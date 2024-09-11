@@ -273,7 +273,7 @@ export default function ReadItem({ config, selectedItem }) {
             title={translate('Price Validity')}
             value={currentErp.priceValidity.split('T')[0]}
             style={{
-              margin: '0 32px 0 250px',
+              margin: '0 32px 0 240px',
             }}
           />
         </Row>
