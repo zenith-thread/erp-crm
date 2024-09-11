@@ -5,7 +5,7 @@ const schema = Joi.object({
   year: Joi.number().required(),
   status: Joi.string().required(),
   notes: Joi.string().allow(''),
-  expiredDate: Joi.date().required(),
+  priceValidity: Joi.date().required(),
   date: Joi.date().required(),
   // array cannot be empty
   items: Joi.array()
@@ -15,7 +15,11 @@ const schema = Joi.object({
         product: Joi.string().required(),
         description: Joi.string().allow(''),
         quantity: Joi.number().required(),
+        unit_size: Joi.string().required(),
         price: Joi.number().required(),
+        transportation: Joi.number().required(),
+        misc_expenses: Joi.number().required(),
+        profit: Joi.number().required(),
         total: Joi.number().required(),
       }).required()
     )

@@ -24,7 +24,7 @@ const invoiceSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  expiredDate: {
+  priceValidity: {
     type: Date,
     required: true,
   },

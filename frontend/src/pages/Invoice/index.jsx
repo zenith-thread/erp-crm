@@ -36,7 +36,7 @@ export default function Invoice() {
     },
     {
       title: translate('expired Date'),
-      dataIndex: 'expiredDate',
+      dataIndex: 'priceValidity',
       render: (date) => {
         return dayjs(date).format(dateFormat);
       },
