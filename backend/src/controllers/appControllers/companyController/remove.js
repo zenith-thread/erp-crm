@@ -17,7 +17,7 @@ const remove = async (Model, req, res) => {
     return res.status(400).json({
       success: false,
       result: null,
-      message: 'Cannot delete company if company attached to any people or she is client',
+      message: 'Cannot delete company if company attached to any people',
     });
   }
   const people = await People.findOne({
@@ -28,7 +28,7 @@ const remove = async (Model, req, res) => {
     return res.status(400).json({
       success: false,
       result: null,
-      message: 'Cannot delete company if company attached to any people or she is client',
+      message: 'Cannot delete company if company attached to any people',
     });
   }
 

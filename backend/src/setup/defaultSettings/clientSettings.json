@@ -8,7 +8,7 @@
   {
     "settingCategory": "client_settings",
     "settingKey": "client_status",
-    "settingValue": ["active", "new", "premium", "unactive"],
+    "settingValue": ["active", "new", "inactive"],
     "valueType": "array"
   },
   {
