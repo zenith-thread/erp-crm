@@ -1,30 +1,4 @@
 <div align="center">
-    </a>
-    <h1>Open "Fair-Code" Source ERP / CRM | Node.js React.js</h1>
-    <p align="center">
-        <p>ERP CRM | Simple To Use | 44 Languages </p>
-    </p>
-
-
-## 🇦🇱 🇩🇿 🇧🇩 🇧🇬 🇨🇳 🇭🇷 🇨🇿 🇩🇰 🇳🇱 🇺🇸 🇪🇪 🇫🇷 🇩🇪 🇬🇷 🇮🇳 🇭🇺 🇮🇩 🇮🇹 🇯🇵 🇰🇷 🇱🇻 🇱🇹 🇲🇰 🇲🇾 🇳🇴 🇵🇱 🇧🇷 🇵🇹 🇮🇷 🇷🇴 🇷🇺 🇸🇰 🇸🇮 🇪🇸 🇸🇪 🇹🇭 🇹🇷 🇺🇦 🇵🇰 🇻🇳 🇷🇸 🇪🇦 🇵🇭 🇫🇮
-
-</div>
-
-## Translation :
-
-[French](doc/README.fr.md#French-Translation) , [Spanish](doc/README.sp.md#Spanish-Translation)
-
-## Features :
-
-Invoice Management
-
-Accounting Management
-
-HR Management
-
-Ant Design Framework(AntD)
-
-Based on Mern Stack (Node.js / Express.js / MongoDb / React.js )
 
 ## Getting started
 
