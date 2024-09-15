@@ -59,17 +59,21 @@ export default function Employee() {
       dataIndex: 'surname',
     },
     {
-      title: translate('Birthday'),
-      dataIndex: 'birthday',
+      title: translate('Birthdate'),
+      dataIndex: 'birthdate',
       isDate: true,
-    },
-    {
-      title: translate('birthplace'),
-      dataIndex: 'birthplace',
     },
     {
       title: translate('gender'),
       dataIndex: 'gender',
+    },
+    {
+      title: translate('Phone'),
+      dataIndex: 'phone',
+    },
+    {
+      title: translate('Email'),
+      dataIndex: 'email',
     },
     {
       title: translate('Department'),
@@ -86,14 +90,6 @@ export default function Employee() {
     {
       title: translate('state'),
       dataIndex: 'state',
-    },
-    {
-      title: translate('Phone'),
-      dataIndex: 'phone',
-    },
-    {
-      title: translate('Email'),
-      dataIndex: 'email',
     },
   ];
 

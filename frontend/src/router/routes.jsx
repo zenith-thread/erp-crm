@@ -42,6 +42,8 @@ const Company = lazy(() => import('@/pages/Company'));
 
 const About = lazy(() => import('@/pages/About'));
 
+const Employee = lazy(() => import('@/pages/Employee'));
+
 let routes = {
   expense: [],
   default: [
@@ -191,6 +193,10 @@ let routes = {
     {
       path: 'category/expenses',
       element: <ExpenseCategory />,
+    },
+    {
+      path: '/employee',
+      element: <Employee />,
     },
     {
       path: '*',
