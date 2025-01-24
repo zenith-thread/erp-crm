@@ -22,7 +22,7 @@ const employeeSchema = new mongoose.Schema({
     required: true,
   },
   birthplace: String,
-  gender: String,
+  gender: { type: String, enum: ['male', 'female'] },
   idCardNumber: {
     type: String,
     trim: true,
@@ -110,6 +110,14 @@ const employeeSchema = new mongoose.Schema({
       trim: true,
     },
   ],
+  department: {
+    type: String,
+    trim: true,
+  },
+  position: {
+    type: String,
+    trim: true,
+  },
   email: {
     type: String,
     trim: true,

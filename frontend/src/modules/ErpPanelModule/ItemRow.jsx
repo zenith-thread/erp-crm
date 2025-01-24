@@ -6,6 +6,7 @@ import { useMoney } from '@/settings';
 import calculate from '@/utils/calculate';
 
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
+import SelectAsync from '@/components/SelectAsync';
 
 export default function ItemRow({ field, remove, current = null }) {
   const [price, setPrice] = useState(0);
@@ -13,6 +14,17 @@ export default function ItemRow({ field, remove, current = null }) {
   const [transportation, setTransportation] = useState(0);
   const [miscExpenses, setMiscExpenses] = useState(0);
   const [profit, setProfit] = useState(0);
+
+  const [taxRate, setTaxRate] = useState(0);
+  const [taxRate2, setTaxRate2] = useState(0);
+
+  const handelTaxChange = (value) => {
+    setTaxRate(value / 100);
+  };
+
+  const handelTaxChange2 = (value) => {
+    setTaxRate2(value / 100);
+  };
 
   const [totalState, setTotal] = useState(undefined);
 
@@ -73,9 +85,14 @@ export default function ItemRow({ field, remove, current = null }) {
     currentTotal = calculate.add(currentTotal, transportation);
     currentTotal = calculate.add(currentTotal, miscExpenses);
     currentTotal = calculate.add(currentTotal, currentTotal * profit);
+    let preTaxCost = currentTotal;
+    currentTotal = calculate.add(calculate.multiply(currentTotal, taxRate), currentTotal);
+    currentTotal = calculate.multiply(currentTotal, taxRate2);
 
-    setTotal(currentTotal);
-  }, [price, quantity, transportation, miscExpenses, profit]);
+    preTaxCost = Math.ceil(preTaxCost + currentTotal);
+
+    setTotal(preTaxCost);
+  }, [price, quantity, transportation, miscExpenses, profit, taxRate, taxRate2]);
 
   return (
     <Row gutter={[12, 12]} style={{ position: 'relative' }}>
@@ -101,24 +118,7 @@ export default function ItemRow({ field, remove, current = null }) {
           />
         </Form.Item>
       </Col>
-      {/* <Col className="gutter-row" span={5}>
-        <Form.Item
-          name={[field.name, 'itemName']}
-          label="Product"
-          rules={[
-            {
-              required: true,
-              message: 'Missing itemName name',
-            },
-            {
-              pattern: /^(?!\s*$)[\s\S]+$/, // Regular expression to allow spaces, alphanumeric, and special characters, but not just spaces
-              message: 'Item Name must contain alphanumeric or special characters',
-            },
-          ]}
-        >
-          <Input placeholder="Item Name" />
-        </Form.Item>
-      </Col> */}
+
       <Col className="gutter-row" span={10}>
         <Form.Item name={[field.name, 'description']} label="Description">
           <Input />
@@ -189,6 +189,55 @@ export default function ItemRow({ field, remove, current = null }) {
           />
         </Form.Item>
       </Col>
+
+      <Col className="gutter-row" span={3}>
+        <Form.Item
+          name={[field.name, 'taxRate']}
+          label="GST"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        >
+          <SelectAsync
+            value={taxRate}
+            onChange={handelTaxChange}
+            entity={'taxes'}
+            outputValue={'taxValue'}
+            displayLabels={['taxName']}
+            withRedirect={true}
+            urlToRedirect="/taxes"
+            redirectLabel={'Add New Tax'}
+            placeholder={'Select Tax Value'}
+          />
+        </Form.Item>
+      </Col>
+
+      <Col className="gutter-row" span={3}>
+        <Form.Item
+          name={[field.name, 'taxRate2']}
+          label="WTH"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        >
+          <SelectAsync
+            value={taxRate2}
+            onChange={handelTaxChange2}
+            entity={'taxes'}
+            outputValue={'taxValue'}
+            displayLabels={['taxName']}
+            withRedirect={true}
+            urlToRedirect="/taxes"
+            redirectLabel={'Add New Tax'}
+            placeholder={'Select Tax Value'}
+          />
+        </Form.Item>
+      </Col>
+
       <Col className="gutter-row" span={7}>
         <Form.Item name={[field.name, 'total']} label=" ">
           <Form.Item>

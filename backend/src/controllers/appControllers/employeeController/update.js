@@ -20,7 +20,7 @@ const update = async (req, res) => {
     return res.status(200).json({
       success: true,
       result: employee,
-      message: 'Employee updated successfully',
+      message: 'Employee updated successfully hewo',
     });
   } catch (error) {
     return res.status(500).json({

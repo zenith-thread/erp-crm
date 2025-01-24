@@ -5,6 +5,7 @@ const { catchErrors } = require('@/handlers/errorHandlers');
 const router = express.Router();
 
 const adminController = require('@/controllers/coreControllers/adminController');
+const employeeController = require('@/controllers/coreControllers/employeeController');
 const settingController = require('@/controllers/coreControllers/settingController');
 const emailController = require('@/controllers/coreControllers/emailController');
 
@@ -26,7 +27,18 @@ router
     catchErrors(adminController.updateProfile)
   );
 
-// //____________________________________________ API for Global Setting _________________
+//_______________________________ Employee Profile _______________________________
+router.route('/employee/read/:id').get(catchErrors(employeeController.read)); // Get employee profile
+router.route('/employee/password-update/:id').patch(catchErrors(employeeController.updatePassword)); // Update employee password
+router
+  .route('/employee/profile/password')
+  .patch(catchErrors(employeeController.updateProfilePassword)); // Update own password
+router.route('/employee/profile/update').patch(
+  singleStorageUpload({ entity: 'employee', fieldName: 'photo', fileType: 'image' }), // File upload middleware
+  catchErrors(employeeController.updateProfile)
+);
+
+//____________________________________________ API for Global Setting _________________
 
 router.route('/setting/create').post(catchErrors(settingController.create));
 router.route('/setting/read/:id').get(catchErrors(settingController.read));

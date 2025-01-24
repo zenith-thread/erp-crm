@@ -69,16 +69,16 @@ function Sidebar({ collapsible, isMobile = false }) {
       icon: <ShopOutlined />,
       label: <Link to={'/company'}>{translate('companies')}</Link>,
     },
-    {
-      key: 'lead',
-      icon: <FilterOutlined />,
-      label: <Link to={'/lead'}>{translate('leads')}</Link>,
-    },
-    {
-      key: 'offer',
-      icon: <FileOutlined />,
-      label: <Link to={'/offer'}>{translate('offers')}</Link>,
-    },
+    // {
+    //   key: 'lead',
+    //   icon: <FilterOutlined />,
+    //   label: <Link to={'/lead'}>{translate('leads')}</Link>,
+    // },
+    // {
+    //   key: 'offer',
+    //   icon: <FileOutlined />,
+    //   label: <Link to={'/offer'}>{translate('offers')}</Link>,
+    // },
     {
       key: 'invoice',
       icon: <ContainerOutlined />,

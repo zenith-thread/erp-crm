@@ -25,6 +25,7 @@ Replace "your-mongodb-uri" with the actual URI of your MongoDB database.
 #### Step 4: Install Backend Dependencies
 
 In your terminal, navigate to the /backend directory
+npm i
 
 ```bash
 cd backend

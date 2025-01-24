@@ -26,6 +26,12 @@ function SidePanelTopContent({ config, formElements, withUpload }) {
 
   const { isReadBoxOpen, isEditBoxOpen } = state;
   const { result: currentItem } = useSelector(selectCurrentItem);
+
+  // Log the currentItem to see its structure
+  useEffect(() => {
+    console.log('Current Item from crudModule:', currentItem); // <-- This will log the employee data including password
+  }, [currentItem]);
+
   const dispatch = useDispatch();
 
   const [labels, setLabels] = useState('');

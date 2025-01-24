@@ -117,7 +117,6 @@ export default function UpdateItem({ config, UpdateForm }) {
             price,
             product,
             description,
-            product,
             transportation,
             misc_expenses,
             profit,

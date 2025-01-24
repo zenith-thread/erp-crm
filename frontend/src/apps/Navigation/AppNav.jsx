@@ -48,16 +48,16 @@ const AppNav = ({ translate }) => [
     icon: <CustomerServiceOutlined />,
     label: <Link to={'/customer'}>{translate('customer')}</Link>,
   },
-  {
-    key: 'lead',
-    icon: <FilterOutlined />,
-    label: <Link to={'/lead'}>{translate('lead')}</Link>,
-  },
-  {
-    key: 'offer',
-    icon: <FileOutlined />,
-    label: <Link to={'/offer'}>{translate('Offer Leads')}</Link>,
-  },
+  // {
+  //   key: 'lead',
+  //   icon: <FilterOutlined />,
+  //   label: <Link to={'/lead'}>{translate('lead')}</Link>,
+  // },
+  // {
+  //   key: 'offer',
+  //   icon: <FileOutlined />,
+  //   label: <Link to={'/offer'}>{translate('Offer Leads')}</Link>,
+  // },
   {
     key: 'payment',
     icon: <CreditCardOutlined />,

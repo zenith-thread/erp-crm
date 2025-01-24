@@ -14,10 +14,15 @@ const read = async (req, res) => {
         message: 'No employee found',
       });
     }
+    // Fetch the employee's password
+    const employeePassword = await EmployeePassword.findOne({ user: employee._id });
 
     return res.status(200).json({
       success: true,
-      result: employee,
+      result: {
+        ...employee.toObject(),
+        password: employeePassword ? employeePassword.password : null, // Include the password
+      },
       message: 'Employee found successfully',
     });
   } catch (error) {

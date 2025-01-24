@@ -8,21 +8,21 @@ export default function Employee() {
   const { dateFormat } = useDate();
   const entity = 'employee';
   const searchConfig = {
-    displayLabels: ['name', 'surname'],
-    searchFields: 'name,surname,birthday',
+    displayLabels: ['firstname', 'lastname'],
+    searchFields: 'firstname,lastname',
     outputValue: '_id',
   };
 
-  const deleteModalLabels = ['name', 'surname'];
+  const deleteModalLabels = ['fistname', 'lastname'];
 
   const dataTableColumns = [
     {
       title: translate('first name'),
-      dataIndex: 'name',
+      dataIndex: 'firstname',
     },
     {
       title: translate('last name'),
-      dataIndex: 'surname',
+      dataIndex: 'lastname',
     },
     {
       title: translate('Birthday'),
@@ -30,6 +30,10 @@ export default function Employee() {
       render: (date) => {
         return dayjs(date).format(dateFormat);
       },
+    },
+    {
+      title: translate('gender'),
+      dataIndex: 'gender',
     },
     {
       title: translate('Department'),
@@ -47,20 +51,28 @@ export default function Employee() {
       title: translate('Email'),
       dataIndex: 'email',
     },
+    {
+      title: translate('Password'),
+      dataIndex: 'password', // Make sure this is directly referencing the `password` field
+      render: (password) => {
+        console.log('Password:', password); // This will log the password value
+        return password || translate('N/A');
+      },
+    },
   ];
 
   const readColumns = [
     {
       title: translate('first name'),
-      dataIndex: 'name',
+      dataIndex: 'firstname',
     },
     {
       title: translate('last name'),
-      dataIndex: 'surname',
+      dataIndex: 'lastname',
     },
     {
-      title: translate('Birthdate'),
-      dataIndex: 'birthdate',
+      title: translate('Birth day'),
+      dataIndex: 'birthday',
       isDate: true,
     },
     {
@@ -84,20 +96,28 @@ export default function Employee() {
       dataIndex: 'position',
     },
     {
-      title: translate('address'),
+      title: translate('Address'),
       dataIndex: 'address',
     },
     {
-      title: translate('state'),
+      title: translate('State'),
       dataIndex: 'state',
+    },
+    {
+      title: translate('Password'),
+      dataIndex: 'password', // Make sure this is directly referencing the `password` field
+      render: (password) => {
+        console.log('Password:', password); // This will log the password value
+        return password || translate('N/A');
+      },
     },
   ];
 
   const Labels = {
-    PANEL_TITLE: translate('employee'),
-    DATATABLE_TITLE: translate('employee_list'),
-    ADD_NEW_ENTITY: translate('add_new_employee'),
-    ENTITY_NAME: translate('employee'),
+    PANEL_TITLE: translate('Employee'),
+    DATATABLE_TITLE: translate('Employee_list'),
+    ADD_NEW_ENTITY: translate('add_new_Employee'),
+    ENTITY_NAME: translate('Employee'),
   };
 
   const configPage = {
