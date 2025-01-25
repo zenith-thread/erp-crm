@@ -57,7 +57,7 @@ export default function CreateItem({ config, CreateForm }) {
   const [offerSubTotal, setOfferSubTotal] = useState(0);
   const handelValuesChange = (changedValues, values) => {
     const items = values['items'];
-    let subTotal = 0;
+    let subtotal = 0;
     let totalProductPrice = 0;
     let totalTransportCost = 0;
     let totalExpense = 0;
@@ -72,22 +72,22 @@ export default function CreateItem({ config, CreateForm }) {
           }
           if (item.quantity && item.price) {
             // Sub Total
-            let total = calculate.multiply(item['quantity'], item['price']);
-            total = calculate.add(total, item['transportation']);
-            total = calculate.add(total, item['misc_expenses']);
-            total = calculate.add(total, (item['profit'] / 100) * total);
+            item['total'] = calculate.multiply(item['quantity'], item['price']);
+            item['total'] = calculate.add(item['total'], item['transportation']);
+            item['total'] = calculate.add(item['total'], item['misc_expenses']);
+            item['total'] = calculate.add(item['total'], (item['profit'] / 100) * item['total']);
 
-            let preTaxCost = total;
+            let preTaxCost = item['total'];
             preTaxCost = calculate.add(
-              calculate.multiply(preTaxCost, item['taxRate'] / 100),
+              calculate.multiply(preTaxCost, item['individualTaxRate'] / 100),
               preTaxCost
             );
-            preTaxCost = calculate.multiply(preTaxCost, item['taxRate2'] / 100);
+            preTaxCost = calculate.multiply(preTaxCost, item['individualTaxRate2'] / 100);
 
             // TRY ADDING SUBTOTAL WITH TOTAL. SO PREPARE TOTAL FIRST WITH PRETAXCOST
-            total = Math.ceil(calculate.add(preTaxCost, total));
+            item['total'] = Math.ceil(calculate.add(preTaxCost, item['total']));
             //sub total
-            subTotal = calculate.add(subTotal, total);
+            subtotal = calculate.add(subtotal, item['total']);
 
             // Total Product Price
             let productPrice = calculate.multiply(item['quantity'], item['price']);
@@ -101,7 +101,7 @@ export default function CreateItem({ config, CreateForm }) {
           }
         }
       });
-      setSubTotal(subTotal);
+      setSubTotal(subtotal);
       setTotalProductPrice(totalProductPrice);
       setTotalTransportCost(totalTransportCost);
       setTotalExpense(totalExpense);
@@ -128,14 +128,14 @@ export default function CreateItem({ config, CreateForm }) {
           item.total = calculate.multiply(item.quantity, item.price);
           item.total = calculate.add(item.total, item.transportation);
           item.total = calculate.add(item.total, item.misc_expenses);
-          item.total = calculate.add(item.total, (item.profit / 100) * subtotal);
+          item.total = calculate.add(item.total, (item.profit / 100) * subTotal);
 
           let preTaxCost = item.total;
           preTaxCost = calculate.add(
-            calculate.multiply(preTaxCost, item.taxRate / 100),
+            calculate.multiply(preTaxCost, item.individualTaxRate / 100),
             preTaxCost
           );
-          preTaxCost = calculate.multiply(preTaxCost, item.taxRate2 / 100);
+          preTaxCost = calculate.multiply(preTaxCost, item.individualTaxRate2 / 100);
 
           item.total = calculate.add(item.total, preTaxCost);
         });
@@ -145,6 +145,8 @@ export default function CreateItem({ config, CreateForm }) {
         };
       }
     }
+    console.log('saved with data (fieldsValue): ', fieldsValue);
+    console.log('saved with data (items): ', fieldsValue.items);
     dispatch(erp.create({ entity, jsonData: fieldsValue }));
   };
   const langDirection = useSelector(selectLangDirection);

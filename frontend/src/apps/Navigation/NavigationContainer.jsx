@@ -55,20 +55,35 @@ function Sidebar({ collapsible, isMobile = false }) {
       label: <Link to={'/'}>{translate('dashboard')}</Link>,
     },
     {
+      key: 'quote',
+      icon: <FileSyncOutlined />,
+      label: <Link to={'/quote'}>{translate('quotations')}</Link>,
+    },
+    {
+      key: 'delivery_chalan',
+      icon: <ContainerOutlined />,
+      label: <Link to={'/invoice'}>{translate('delivery Chalan')}</Link>,
+    },
+    {
+      key: 'invoice',
+      icon: <ContainerOutlined />,
+      label: <Link to={'/invoice'}>{translate('invoices')}</Link>,
+    },
+    {
       key: 'customer',
       icon: <CustomerServiceOutlined />,
-      label: <Link to={'/customer'}>{translate('customers')}</Link>,
+      label: <Link to={'/customer'}>{translate('client')}</Link>,
     },
-    {
-      key: 'people',
-      icon: <UserOutlined />,
-      label: <Link to={'/people'}>{translate('peoples')}</Link>,
-    },
-    {
-      key: 'company',
-      icon: <ShopOutlined />,
-      label: <Link to={'/company'}>{translate('companies')}</Link>,
-    },
+    // {
+    //   key: 'people',
+    //   icon: <UserOutlined />,
+    //   label: <Link to={'/people'}>{translate('peoples')}</Link>,
+    // },
+    // {
+    //   key: 'company',
+    //   icon: <ShopOutlined />,
+    //   label: <Link to={'/company'}>{translate('companies')}</Link>,
+    // },
     // {
     //   key: 'lead',
     //   icon: <FilterOutlined />,
@@ -79,16 +94,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     //   icon: <FileOutlined />,
     //   label: <Link to={'/offer'}>{translate('offers')}</Link>,
     // },
-    {
-      key: 'invoice',
-      icon: <ContainerOutlined />,
-      label: <Link to={'/invoice'}>{translate('invoices')}</Link>,
-    },
-    {
-      key: 'quote',
-      icon: <FileSyncOutlined />,
-      label: <Link to={'/quote'}>{translate('quotations')}</Link>,
-    },
+
     {
       key: 'payment',
       icon: <CreditCardOutlined />,
@@ -115,11 +121,11 @@ function Sidebar({ collapsible, isMobile = false }) {
       icon: <ReconciliationOutlined />,
       label: <Link to={'/category/expenses'}>{translate('expenses_Category')}</Link>,
     },
-    {
-      key: 'employee',
-      icon: <UserOutlined />,
-      label: <Link to={'/employee'}>{translate('employee')}</Link>,
-    },
+    // {
+    //   key: 'employee',
+    //   icon: <UserOutlined />,
+    //   label: <Link to={'/employee'}>{translate('employee')}</Link>,
+    // },
     {
       label: translate('Settings'),
       key: 'settings',

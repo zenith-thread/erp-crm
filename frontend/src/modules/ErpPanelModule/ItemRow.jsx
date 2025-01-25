@@ -15,18 +15,18 @@ export default function ItemRow({ field, remove, current = null }) {
   const [miscExpenses, setMiscExpenses] = useState(0);
   const [profit, setProfit] = useState(0);
 
-  const [taxRate, setTaxRate] = useState(0);
-  const [taxRate2, setTaxRate2] = useState(0);
+  const [individualTaxRate, setindividualTaxRate] = useState(0);
+  const [individualTaxRate2, setindividualTaxRate2] = useState(0);
 
   const handelTaxChange = (value) => {
-    setTaxRate(value / 100);
+    setindividualTaxRate(value / 100);
   };
 
   const handelTaxChange2 = (value) => {
-    setTaxRate2(value / 100);
+    setindividualTaxRate2(value / 100);
   };
 
-  const [totalState, setTotal] = useState(undefined);
+  const [totalState, setTotal] = useState(0);
 
   const money = useMoney();
 
@@ -55,6 +55,7 @@ export default function ItemRow({ field, remove, current = null }) {
       // and if it doesn't we can access invoice.items.
 
       const { items, invoice } = current;
+      console.log('TOTAL CHECK KR RHA HN BEFORE AND AFTER UPDATE: ', items);
 
       if (invoice) {
         const item = invoice[field.fieldKey];
@@ -65,6 +66,7 @@ export default function ItemRow({ field, remove, current = null }) {
           setTransportation(item.transportation);
           setMiscExpenses(item.miscExpenses);
           setProfit(item.profit);
+          setTotal(item.total);
         }
       } else {
         const item = items[field.fieldKey];
@@ -75,6 +77,7 @@ export default function ItemRow({ field, remove, current = null }) {
           setTransportation(item.transportation);
           setMiscExpenses(item.miscExpenses);
           setProfit(item.profit);
+          setTotal(item.total);
         }
       }
     }
@@ -86,13 +89,21 @@ export default function ItemRow({ field, remove, current = null }) {
     currentTotal = calculate.add(currentTotal, miscExpenses);
     currentTotal = calculate.add(currentTotal, currentTotal * profit);
     let preTaxCost = currentTotal;
-    currentTotal = calculate.add(calculate.multiply(currentTotal, taxRate), currentTotal);
-    currentTotal = calculate.multiply(currentTotal, taxRate2);
+    currentTotal = calculate.add(calculate.multiply(currentTotal, individualTaxRate), currentTotal);
+    currentTotal = calculate.multiply(currentTotal, individualTaxRate2);
 
     preTaxCost = Math.ceil(preTaxCost + currentTotal);
 
     setTotal(preTaxCost);
-  }, [price, quantity, transportation, miscExpenses, profit, taxRate, taxRate2]);
+  }, [
+    price,
+    quantity,
+    transportation,
+    miscExpenses,
+    profit,
+    individualTaxRate,
+    individualTaxRate2,
+  ]);
 
   return (
     <Row gutter={[12, 12]} style={{ position: 'relative' }}>
@@ -192,7 +203,7 @@ export default function ItemRow({ field, remove, current = null }) {
 
       <Col className="gutter-row" span={3}>
         <Form.Item
-          name={[field.name, 'taxRate']}
+          name={[field.name, 'individualTaxRate']}
           label="GST"
           rules={[
             {
@@ -201,7 +212,7 @@ export default function ItemRow({ field, remove, current = null }) {
           ]}
         >
           <SelectAsync
-            value={taxRate}
+            value={individualTaxRate}
             onChange={handelTaxChange}
             entity={'taxes'}
             outputValue={'taxValue'}
@@ -216,7 +227,7 @@ export default function ItemRow({ field, remove, current = null }) {
 
       <Col className="gutter-row" span={3}>
         <Form.Item
-          name={[field.name, 'taxRate2']}
+          name={[field.name, 'individualTaxRate2']}
           label="WTH"
           rules={[
             {
@@ -225,7 +236,7 @@ export default function ItemRow({ field, remove, current = null }) {
           ]}
         >
           <SelectAsync
-            value={taxRate2}
+            value={individualTaxRate2}
             onChange={handelTaxChange2}
             entity={'taxes'}
             outputValue={'taxValue'}

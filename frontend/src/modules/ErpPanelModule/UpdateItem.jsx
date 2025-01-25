@@ -41,6 +41,9 @@ export default function UpdateItem({ config, UpdateForm }) {
   const { current, isLoading, isSuccess } = useSelector(selectUpdatedItem);
   const [form] = Form.useForm();
   const [subTotal, setSubTotal] = useState(0);
+  const [totalProductPrice, setTotalProductPrice] = useState(0);
+  const [totalTransportCost, setTotalTransportCost] = useState(0);
+  const [totalExpense, setTotalExpense] = useState(0);
 
   const resetErp = {
     status: '',
@@ -51,9 +54,11 @@ export default function UpdateItem({ config, UpdateForm }) {
       address: '',
     },
     subTotal: 0,
-    taxTotal: 0,
     taxRate: 0,
+    taxTotal: 0,
     total: 0,
+    taxRate2: 0,
+    taxTotal2: 0,
     credit: 0,
     number: 0,
     year: 0,
@@ -64,24 +69,51 @@ export default function UpdateItem({ config, UpdateForm }) {
   const { id } = useParams();
 
   const handelValuesChange = (changedValues, values) => {
-    console.log('VALUES WALI VALUES: ', values);
     const items = values['items'];
-    let subTotal = 0;
+    let subtotal = 0;
+    let totalProductPrice = 0;
+    let totalTransportCost = 0;
+    let totalExpense = 0;
 
+    console.log('UPDATE WALI VALUES: ', items);
     if (items) {
       items.map((item) => {
+        console.log('UPDATE WALI INDIVIDUAL ITEM: ', item);
         if (item) {
           if (item.quantity && item.price) {
-            let total = calculate.multiply(item['quantity'], item['price']);
-            total = calculate.add(total, item['transportation']);
-            total = calculate.add(total, item['misc_expenses']);
-            total = calculate.add(total, (item['profit'] / 100) * total);
+            item['total'] = calculate.multiply(item['quantity'], item['price']);
+            item['total'] = calculate.add(item['total'], item['transportation']);
+            item['total'] = calculate.add(item['total'], item['misc_expenses']);
+            item['total'] = calculate.add(item['total'], (item['profit'] / 100) * item['total']);
+
+            let preTaxCost = item['total'];
+            preTaxCost = calculate.add(
+              calculate.multiply(preTaxCost, item['individualTaxRate'] / 100),
+              preTaxCost
+            );
+            preTaxCost = calculate.multiply(preTaxCost, item['individualTaxRate2'] / 100);
+
+            // TRY ADDING SUBTOTAL WITH TOTAL. SO PREPARE TOTAL FIRST WITH PRETAXCOST
+            item['total'] = Math.ceil(calculate.add(preTaxCost, item['total']));
             //sub total
-            subTotal = calculate.add(subTotal, total);
+            subtotal = calculate.add(subtotal, item['total']);
+
+            // Total Product Price
+            let productPrice = calculate.multiply(item['quantity'], item['price']);
+            totalProductPrice = calculate.add(totalProductPrice, productPrice);
+
+            // Total Transport Cost
+            totalTransportCost = calculate.add(totalTransportCost, item['transportation']);
+
+            // Total Expense
+            totalExpense = calculate.add(totalExpense, item['misc_expenses']);
           }
         }
       });
-      setSubTotal(subTotal);
+      setSubTotal(subtotal);
+      setTotalProductPrice(totalProductPrice);
+      setTotalTransportCost(totalTransportCost);
+      setTotalExpense(totalExpense);
     }
   };
 
@@ -99,6 +131,8 @@ export default function UpdateItem({ config, UpdateForm }) {
         fieldsValue.items.map((item) => {
           const {
             quantity,
+            individualTaxRate,
+            individualTaxRate2,
             price,
             product,
             description,
@@ -107,13 +141,22 @@ export default function UpdateItem({ config, UpdateForm }) {
             profit,
             unit_size,
           } = item;
+          // console.log('BHAI TOTAL DEKHO: ', total);
           let total = quantity * price;
           total = total + transportation;
-          (total = total + misc_expenses), (total = total + (profit / 100) * total);
+          total = total + misc_expenses;
+          total = total + (profit / 100) * total;
+
+          let preTaxCost = total;
+          preTaxCost = (individualTaxRate / 100) * preTaxCost + total;
+          preTaxCost = preTaxCost * (individualTaxRate2 / 100);
+          total = Math.ceil(preTaxCost + total);
 
           newList.push({
             total,
             quantity,
+            individualTaxRate,
+            individualTaxRate2,
             price,
             product,
             description,
@@ -142,6 +185,7 @@ export default function UpdateItem({ config, UpdateForm }) {
     if (current) {
       setCurrentErp(current);
       let formData = { ...current };
+      console.log('formData k andar total vlaue: ', formData);
       if (formData.date) {
         console.log('Date value:', formData.date);
         formData.date = dayjs(formData.date);
@@ -199,7 +243,13 @@ export default function UpdateItem({ config, UpdateForm }) {
       <Divider dashed />
       <Loading isLoading={isLoading}>
         <Form form={form} layout="vertical" onFinish={onSubmit} onValuesChange={handelValuesChange}>
-          <UpdateForm subTotal={subTotal} current={current} />
+          <UpdateForm
+            subTotal={subTotal}
+            totalProductPrice={totalProductPrice}
+            totalTransportCost={totalTransportCost}
+            totalExpense={totalExpense}
+            current={current}
+          />
         </Form>
       </Loading>
     </>

@@ -71,15 +71,27 @@ const quoteSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+      individualTaxRate2: {
+        type: Number,
+      },
+      individualTaxRate: {
+        type: Number,
+      },
     },
   ],
   taxRate: {
+    type: Number,
+  },
+  taxRate2: {
     type: Number,
   },
   subTotal: {
     type: Number,
   },
   taxTotal: {
+    type: Number,
+  },
+  taxTotal2: {
     type: Number,
   },
   total: {

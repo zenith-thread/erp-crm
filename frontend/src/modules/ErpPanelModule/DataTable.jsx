@@ -111,7 +111,7 @@ export default function DataTable({ config, extra = [] }) {
     {
       title: '',
       key: 'action',
-      fixed: 'right',
+      fixed: 'left',
       render: (_, record) => (
         <Dropdown
           menu={{
@@ -173,7 +173,7 @@ export default function DataTable({ config, extra = [] }) {
     const options = { equal: value, filter: searchConfig?.entity };
     dispatch(erp.list({ entity, options }));
   };
-  const langDirection=useSelector(selectLangDirection)
+  const langDirection = useSelector(selectLangDirection);
 
   return (
     <>
@@ -181,7 +181,7 @@ export default function DataTable({ config, extra = [] }) {
         title={DATATABLE_TITLE}
         ghost={true}
         onBack={() => window.history.back()}
-        backIcon={langDirection==="rtl"?<ArrowRightOutlined/>:<ArrowLeftOutlined />}
+        backIcon={langDirection === 'rtl' ? <ArrowRightOutlined /> : <ArrowLeftOutlined />}
         extra={[
           <AutoCompleteAsync
             key={`${uniqueId()}`}
@@ -201,7 +201,7 @@ export default function DataTable({ config, extra = [] }) {
         ]}
         style={{
           padding: '20px 0px',
-          direction:langDirection
+          direction: langDirection,
         }}
       ></PageHeader>
 
