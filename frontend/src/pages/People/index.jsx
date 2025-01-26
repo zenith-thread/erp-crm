@@ -8,16 +8,16 @@ export default function People() {
   const translate = useLanguage();
   const entity = 'people';
   const searchConfig = {
-    displayLabels: ['firstname', 'lastname'],
-    searchFields: 'firstname,lastname,email',
+    displayLabels: ['name'],
+    searchFields: 'name',
   };
-  const deleteModalLabels = ['firstname', 'lastname'];
+  const deleteModalLabels = ['name'];
 
   const Labels = {
-    PANEL_TITLE: translate('person'),
-    DATATABLE_TITLE: translate('people_list'),
-    ADD_NEW_ENTITY: translate('add_new_person'),
-    ENTITY_NAME: translate('person'),
+    PANEL_TITLE: translate('client'),
+    DATATABLE_TITLE: translate('client_list'),
+    ADD_NEW_ENTITY: translate('add_new_client'),
+    ENTITY_NAME: translate('client'),
   };
   const configPage = {
     entity,

@@ -55,6 +55,16 @@ function Sidebar({ collapsible, isMobile = false }) {
       label: <Link to={'/'}>{translate('dashboard')}</Link>,
     },
     {
+      key: 'people',
+      icon: <UserOutlined />,
+      label: <Link to={'/people'}>{translate('client')}</Link>,
+    },
+    {
+      key: 'company',
+      icon: <ShopOutlined />,
+      label: <Link to={'/company'}>{translate('vendor')}</Link>,
+    },
+    {
       key: 'quote',
       icon: <FileSyncOutlined />,
       label: <Link to={'/quote'}>{translate('quotations')}</Link>,
@@ -69,20 +79,10 @@ function Sidebar({ collapsible, isMobile = false }) {
       icon: <ContainerOutlined />,
       label: <Link to={'/invoice'}>{translate('invoices')}</Link>,
     },
-    {
-      key: 'customer',
-      icon: <CustomerServiceOutlined />,
-      label: <Link to={'/customer'}>{translate('client')}</Link>,
-    },
     // {
-    //   key: 'people',
-    //   icon: <UserOutlined />,
-    //   label: <Link to={'/people'}>{translate('peoples')}</Link>,
-    // },
-    // {
-    //   key: 'company',
-    //   icon: <ShopOutlined />,
-    //   label: <Link to={'/company'}>{translate('companies')}</Link>,
+    //   key: 'customer',
+    //   icon: <CustomerServiceOutlined />,
+    //   label: <Link to={'/customer'}>{translate('client')}</Link>,
     // },
     // {
     //   key: 'lead',
@@ -94,22 +94,20 @@ function Sidebar({ collapsible, isMobile = false }) {
     //   icon: <FileOutlined />,
     //   label: <Link to={'/offer'}>{translate('offers')}</Link>,
     // },
-
     {
-      key: 'payment',
-      icon: <CreditCardOutlined />,
-      label: <Link to={'/payment'}>{translate('payments')}</Link>,
+      key: 'categoryproduct',
+      icon: <TagsOutlined />,
+      label: <Link to={'/category/product'}>{translate('products_category')}</Link>,
     },
-
     {
       key: 'product',
       icon: <TagOutlined />,
       label: <Link to={'/product'}>{translate('products')}</Link>,
     },
     {
-      key: 'categoryproduct',
-      icon: <TagsOutlined />,
-      label: <Link to={'/category/product'}>{translate('products_category')}</Link>,
+      key: 'expensesCategory',
+      icon: <ReconciliationOutlined />,
+      label: <Link to={'/category/expenses'}>{translate('expenses_Category')}</Link>,
     },
     {
       key: 'expenses',
@@ -117,9 +115,9 @@ function Sidebar({ collapsible, isMobile = false }) {
       label: <Link to={'/expenses'}>{translate('expenses')}</Link>,
     },
     {
-      key: 'expensesCategory',
-      icon: <ReconciliationOutlined />,
-      label: <Link to={'/category/expenses'}>{translate('expenses_Category')}</Link>,
+      key: 'payment',
+      icon: <CreditCardOutlined />,
+      label: <Link to={'/payment'}>{translate('payments')}</Link>,
     },
     // {
     //   key: 'employee',

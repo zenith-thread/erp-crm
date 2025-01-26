@@ -68,8 +68,8 @@ export default function DashboardModule() {
       dataIndex: 'number',
     },
     {
-      title: translate('Client'),
-      dataIndex: ['client', 'name'],
+      title: translate('client'),
+      dataIndex: ['people', 'name'],
     },
 
     {

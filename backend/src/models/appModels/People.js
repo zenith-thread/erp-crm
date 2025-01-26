@@ -7,52 +7,24 @@ const schema = new mongoose.Schema({
   },
   enabled: {
     type: Boolean,
-    default: true,
-  },
-
-  firstname: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-  lastname: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-  isClient: {
-    type: Boolean,
     default: false,
   },
-  company: { type: mongoose.Schema.ObjectId, ref: 'Company' },
-  bio: String,
-  idCardNumber: {
+  name: {
+    type: String,
+    required: true,
+  },
+  ntnNumber: {
+    type: String,
+  },
+  bankAccountTitle: {
     type: String,
     trim: true,
   },
-  idCardType: {
-    type: String,
-  },
-  securitySocialNbr: {
-    type: String,
-  },
-  taxNumber: {
-    type: String,
-  },
-  birthday: {
-    type: Date,
-  },
-  birthplace: {
-    type: String,
-  },
-  gender: {
-    type: String,
-    enum: ['male', 'female'],
-  },
-  photo: {
-    type: String,
-  },
   bankName: {
+    type: String,
+    trim: true,
+  },
+  bankBranch: {
     type: String,
     trim: true,
   },
@@ -64,33 +36,13 @@ const schema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  bankNumber: {
+  bankAccountNumber: {
     type: String,
     trim: true,
   },
-  bankRouting: {
+  bankCode: {
     type: String,
     trim: true,
-  },
-  customField: [
-    {
-      fieldName: {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-      fieldType: {
-        type: String,
-        trim: true,
-        lowercase: true,
-        default: 'string',
-      },
-      fieldValue: {},
-    },
-  ],
-  location: {
-    latitude: Number,
-    longitude: Number,
   },
   address: {
     type: String,
@@ -123,7 +75,6 @@ const schema = new mongoose.Schema({
     trim: true,
     lowercase: true,
   },
-
   otherEmail: [
     {
       type: String,
@@ -131,60 +82,16 @@ const schema = new mongoose.Schema({
       lowercase: true,
     },
   ],
-  socialMedia: {
-    facebook: String,
-    instagram: String,
-    twitter: String,
-    linkedin: String,
-    tiktok: String,
-    youtube: String,
-    snapchat: String,
-  },
   website: {
     type: String,
     trim: true,
     lowercase: true,
   },
-  images: [
-    {
-      id: String,
-      name: String,
-      path: String,
-      description: String,
-      isPublic: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
-  files: [
-    {
-      id: String,
-      name: String,
-      path: String,
-      description: String,
-      isPublic: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
-  notes: String,
+  // interestedIn: [{ type: mongoose.Schema.ObjectId, ref: 'Product' }],
+  createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
+  assigned: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
+  source: String,
   category: String,
-  status: String,
-  approved: {
-    type: Boolean,
-  },
-  verified: {
-    type: Boolean,
-  },
-  tags: [
-    {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-  ],
   created: {
     type: Date,
     default: Date.now,
@@ -193,11 +100,9 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  isPublic: {
-    type: Boolean,
-    default: false,
-  },
+  company: { type: mongoose.Schema.ObjectId, ref: 'Company' },
 });
 
 schema.plugin(require('mongoose-autopopulate'));
+
 module.exports = mongoose.model('People', schema);

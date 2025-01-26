@@ -7,42 +7,24 @@ const schema = new mongoose.Schema({
   },
   enabled: {
     type: Boolean,
-    default: true,
+    default: false,
   },
-
   name: {
     type: String,
-    trim: true,
     required: true,
   },
-  legalName: {
+  ntnNumber: {
+    type: String,
+  },
+  bankAccountTitle: {
     type: String,
     trim: true,
   },
-  hasParentCompany: {
-    type: Boolean,
-    default: false,
-  },
-  parentCompany: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Company',
-  },
-  isClient: {
-    type: Boolean,
-    default: false,
-  },
-  peoples: [{ type: mongoose.Schema.ObjectId, ref: 'People', autopopulate: true }],
-  mainContact: { type: mongoose.Schema.ObjectId, ref: 'People', autopopulate: true },
-  icon: {
-    type: String,
-    trim: true,
-  },
-  logo: {
-    type: String,
-    trim: true,
-  },
-  imageHeader: String,
   bankName: {
+    type: String,
+    trim: true,
+  },
+  bankBranch: {
     type: String,
     trim: true,
   },
@@ -54,54 +36,13 @@ const schema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  bankNumber: {
+  bankAccountNumber: {
     type: String,
     trim: true,
   },
-  bankRouting: {
+  bankCode: {
     type: String,
     trim: true,
-  },
-  bankCountry: {
-    type: String,
-    trim: true,
-  },
-  companyRegNumber: {
-    type: String,
-    trim: true,
-  },
-  companyTaxNumber: {
-    type: String,
-    trim: true,
-  },
-  companyTaxId: {
-    type: String,
-    trim: true,
-  },
-  companyRegId: {
-    type: String,
-    trim: true,
-  },
-  securitySocialNbr: String,
-  customField: [
-    {
-      fieldName: {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-      fieldType: {
-        type: String,
-        trim: true,
-        lowercase: true,
-        default: 'string',
-      },
-      fieldValue: {},
-    },
-  ],
-  location: {
-    latitude: Number,
-    longitude: Number,
   },
   address: {
     type: String,
@@ -121,27 +62,23 @@ const schema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    trim: true,
+    trim: false,
   },
   otherPhone: [
     {
       type: String,
-      trim: true,
+      trim: false,
     },
   ],
-  fax: {
-    type: String,
-    trim: true,
-  },
   email: {
     type: String,
-    trim: true,
+    trim: false,
     lowercase: true,
   },
   otherEmail: [
     {
       type: String,
-      trim: true,
+      trim: false,
       lowercase: true,
     },
   ],
@@ -150,55 +87,11 @@ const schema = new mongoose.Schema({
     trim: true,
     lowercase: true,
   },
-  socialMedia: {
-    facebook: String,
-    instagram: String,
-    twitter: String,
-    linkedin: String,
-    tiktok: String,
-    youtube: String,
-    snapchat: String,
-  },
-  images: [
-    {
-      id: String,
-      name: String,
-      path: String,
-      description: String,
-      isPublic: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
-  files: [
-    {
-      id: String,
-      name: String,
-      path: String,
-      description: String,
-      isPublic: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
+  // interestedIn: [{ type: mongoose.Schema.ObjectId, ref: 'Product' }],
+  createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
+  assigned: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
+  source: String,
   category: String,
-  approved: {
-    type: Boolean,
-    default: true,
-  },
-  verified: {
-    type: Boolean,
-  },
-  notes: String,
-  tags: [
-    {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-  ],
   created: {
     type: Date,
     default: Date.now,
@@ -207,11 +100,10 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  isPublic: {
-    type: Boolean,
-    default: false,
-  },
+  peoples: [{ type: mongoose.Schema.ObjectId, ref: 'People', autopopulate: true }],
+  mainContact: { type: mongoose.Schema.ObjectId, ref: 'People', autopopulate: true },
 });
 
 schema.plugin(require('mongoose-autopopulate'));
+
 module.exports = mongoose.model('Company', schema);

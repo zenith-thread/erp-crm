@@ -1,173 +1,139 @@
 export const fields = {
   name: {
     type: 'string',
+    label: 'Name',
     required: true,
+    hasFeedback: true,
+    disableForForm: false,
+    width: 100,
   },
-  mainContact: {
-    type: 'search',
-    renderAsTag: true,
-    label: 'Contact',
-    entity: 'people',
-    redirectLabel: 'Add New Person',
-    withRedirect: true,
-    urlToRedirect: '/people',
-    displayLabels: ['firstname', 'lastname'],
-    searchFields: 'firstname,lastname',
-    dataIndex: ['mainContact', 'firstname'],
+  ntnNumber: {
+    type: 'string',
+    label: 'NTN Number',
+    hasFeedback: true,
+    disableForForm: false,
+  },
+  bankAccountTitle: {
+    type: 'string',
+    label: 'Account Title',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  bankName: {
+    type: 'string',
+    label: 'Bank Name',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  bankBranch: {
+    type: 'string',
+    label: 'Bank Branch',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  bankIban: {
+    type: 'string',
+    label: 'Bank IBAN',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  bankSwift: {
+    type: 'string',
+    label: 'Bank SWIFT Code',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  bankAccountNumber: {
+    type: 'string',
+    label: 'Bank Account Number',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  bankCode: {
+    type: 'string',
+    label: 'Bank Code',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  address: {
+    type: 'text',
+    label: 'Address',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  city: {
+    type: 'string',
+    label: 'City',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  State: {
+    type: 'string',
+    label: 'State',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  postalCode: {
+    type: 'number',
+    label: 'Postal Code',
+    disableForForm: false,
+    hasFeedback: true,
   },
   country: {
-    type: 'country',
+    type: 'country', // Custom country field type
+    label: 'Country',
+    disableForForm: false,
+    hasFeedback: true,
   },
   phone: {
+    type: 'phone', // Custom phone field type
+    label: 'Phone',
+    disableForForm: false,
+    hasFeedback: true,
+    trim: true,
+  },
+  otherPhone: {
     type: 'phone',
+    label: 'Other Phone Number',
+    disableForForm: false,
+    hasFeedback: true,
+    trim: true,
   },
   email: {
+    type: 'email', // Custom email field type
+    label: 'Email',
+    disableForForm: false,
+    hasFeedback: true,
+  },
+  otherEmail: {
     type: 'email',
-    required: true,
+    label: 'Other Emails',
+    disableForForm: false,
+    hasFeedback: true,
   },
   website: {
-    type: 'url',
+    type: 'string',
+    label: 'Website',
+    disableForForm: false,
+    hasFeedback: true,
   },
-  // legalName: {
-  //   type: 'string',
-  //   required: true,
-  // },
-  // hasParentCompany: {
-  //   type: 'boolean',
-  //   default: false,
-  // },
-  // parentCompany: { type: 'search', entity: 'company' },
-
-  // people: [{ type: 'search', entity: 'people', mutliple: true }],
-
-  // icon: {
-  //   type: 'image',
-  // },
-  // logo: {
-  //   type: 'image',
-  // },
-  // imageHeader: 'image',
-  // bankName: {
-  //   type: 'string',
-  // },
-  // bankIban: {
-  //   type: 'string',
-  // },
-  // bankSwift: {
-  //   type: 'string',
-  // },
-  // bankNumber: {
-  //   type: 'string',
-  // },
-  // bankRouting: {
-  //   type: 'string',
-  // },
-  // bankCountry: {
-  //   type: 'string',
-  // },
-  // companyRegNumber: {
-  //   type: 'string',
-  // },
-  // companyTaxNumber: {
-  //   type: 'string',
-  // },
-  // companyTaxId: {
-  //   type: 'string',
-  // },
-  // companyRegId: {
-  //   type: 'string',
-  // },
-  // securitySocialNbr: 'string',
-  // customField: [
-  //   {
-  //     fieldName: {
-  //       type: 'string',
-
-  //
-  //     },
-  //     fieldType: {
-  //       type: 'string',
-
-  //
-  //       default: 'string',
-  //     },
-  //     fieldValue: {},
-  //   },
-  // ],
-  // location: {
-  //   latitude: Number,
-  //   longitude: Number,
-  // },
-  // address: {
-  //   type: 'string',
-  // },
-  // city: {
-  //   type: 'string',
-  // },
-  // State: {
-  //   type: 'string',
-  // },
-  // postalCode: {
-  //   type: Number,
-  // },
-
-  // otherPhone: [
-  //   {
-  //     type: 'string',
-  //   },
-  // ],
-  // fax: {
-  //   type: 'string',
-  // },
-
-  // otherEmail: [
-  //   {
-  //     type: 'string',
-  //   },
-  // ],
-
-  // socialMedia: {
-  //   facebook: 'string',
-  //   instagram: 'string',
-  //   twitter: 'string',
-  //   linkedin: 'string',
-  //   tiktok: 'string',
-  //   youtube: 'string',
-  //   snapchat: 'string',
-  // },
-  // images: [
-  //   {
-  //     id: 'string',
-  //     name: 'string',
-  //     path: 'string',
-  //     description: 'string',
-  //     isPublic: {
-  //       type: 'boolean',
-  //       default: false,
-  //     },
-  //   },
-  // ],
-  // files: [
-  //   {
-  //     id: 'string',
-  //     name: 'string',
-  //     path: 'string',
-  //     description: 'string',
-  //     isPublic: {
-  //       type: 'boolean',
-  //       default: false,
-  //     },
-  //   },
-  // ],
-  // category: 'string',
-  // approved: {
-  //   type: 'boolean',
-  //   default: true,
-  // },
-  // verified: {
-  //   type: 'boolean',
-  // },
-  // notes: {
-  //   type: 'string',
-  // },
+  createdBy: {
+    type: 'reference',
+    label: 'Created By',
+    entity: 'admin', // Reference entity name for Admin
+    displayLabels: ['firstname', 'lastname'],
+    searchFields: 'firstname,lastname',
+    disableForTable: true,
+    disableForForm: true,
+  },
+  created: {
+    type: 'date',
+    label: 'Created At',
+    disableForForm: true,
+  },
+  updated: {
+    type: 'date',
+    label: 'Last Updated',
+    disableForForm: true,
+  },
 };

@@ -14,10 +14,10 @@ export default function Company() {
   const deleteModalLabels = ['name'];
 
   const Labels = {
-    PANEL_TITLE: translate('company'),
-    DATATABLE_TITLE: translate('company_list'),
-    ADD_NEW_ENTITY: translate('add_new_company'),
-    ENTITY_NAME: translate('company'),
+    PANEL_TITLE: translate('vendor'),
+    DATATABLE_TITLE: translate('vendor_list'),
+    ADD_NEW_ENTITY: translate('add_new_vendor'),
+    ENTITY_NAME: translate('vendor'),
   };
   const configPage = {
     entity,
