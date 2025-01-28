@@ -54,6 +54,7 @@ export default function CreateItem({ config, CreateForm }) {
   const [totalProductPrice, setTotalProductPrice] = useState(0);
   const [totalTransportCost, setTotalTransportCost] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
+  const [totalQuantity, setTotalQuantity] = useState(0);
   const [offerSubTotal, setOfferSubTotal] = useState(0);
   const handelValuesChange = (changedValues, values) => {
     const items = values['items'];
@@ -61,6 +62,7 @@ export default function CreateItem({ config, CreateForm }) {
     let totalProductPrice = 0;
     let totalTransportCost = 0;
     let totalExpense = 0;
+    let totalquantity = 0;
     let subOfferTotal = 0;
 
     if (items) {
@@ -98,6 +100,9 @@ export default function CreateItem({ config, CreateForm }) {
 
             // Total Expense
             totalExpense = calculate.add(totalExpense, item['misc_expenses']);
+
+            // Total Quantity
+            totalquantity = calculate.add(totalquantity, item['quantity']);
           }
         }
       });
@@ -105,6 +110,7 @@ export default function CreateItem({ config, CreateForm }) {
       setTotalProductPrice(totalProductPrice);
       setTotalTransportCost(totalTransportCost);
       setTotalExpense(totalExpense);
+      setTotalQuantity(totalquantity);
       setOfferSubTotal(subOfferTotal);
     }
   };
@@ -142,11 +148,10 @@ export default function CreateItem({ config, CreateForm }) {
         fieldsValue = {
           ...fieldsValue,
           items: newList,
+          totalQuantity: totalQuantity,
         };
       }
     }
-    console.log('saved with data (fieldsValue): ', fieldsValue);
-    console.log('saved with data (items): ', fieldsValue.items);
     dispatch(erp.create({ entity, jsonData: fieldsValue }));
   };
   const langDirection = useSelector(selectLangDirection);
@@ -183,6 +188,7 @@ export default function CreateItem({ config, CreateForm }) {
             totalProductPrice={totalProductPrice}
             totalTransportCost={totalTransportCost}
             totalExpense={totalExpense}
+            totalQuantity={totalQuantity}
             offerTotal={offerSubTotal}
           />
         </Form>

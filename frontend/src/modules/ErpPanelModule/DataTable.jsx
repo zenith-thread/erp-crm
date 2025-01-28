@@ -49,6 +49,7 @@ export default function DataTable({ config, extra = [] }) {
   const { result: listResult, isLoading: listIsLoading } = useSelector(selectListItems);
 
   const { pagination, items: dataSource } = listResult;
+  console.log('LIST ITEMS FOR DATA TABLE: ', dataSource);
 
   const { erpContextAction } = useErpContext();
   const { modal } = erpContextAction;

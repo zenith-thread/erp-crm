@@ -13,48 +13,6 @@ export const fields = {
     hasFeedback: true,
     disableForForm: false,
   },
-  bankAccountTitle: {
-    type: 'string',
-    label: 'Account Title',
-    disableForForm: false,
-    hasFeedback: true,
-  },
-  bankName: {
-    type: 'string',
-    label: 'Bank Name',
-    disableForForm: false,
-    hasFeedback: true,
-  },
-  bankBranch: {
-    type: 'string',
-    label: 'Bank Branch',
-    disableForForm: false,
-    hasFeedback: true,
-  },
-  bankIban: {
-    type: 'string',
-    label: 'Bank IBAN',
-    disableForForm: false,
-    hasFeedback: true,
-  },
-  bankSwift: {
-    type: 'string',
-    label: 'Bank SWIFT Code',
-    disableForForm: false,
-    hasFeedback: true,
-  },
-  bankAccountNumber: {
-    type: 'string',
-    label: 'Bank Account Number',
-    disableForForm: false,
-    hasFeedback: true,
-  },
-  bankCode: {
-    type: 'string',
-    label: 'Bank Code',
-    disableForForm: false,
-    hasFeedback: true,
-  },
   address: {
     type: 'text',
     label: 'Address',

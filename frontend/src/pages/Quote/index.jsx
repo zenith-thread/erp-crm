@@ -11,11 +11,11 @@ export default function Quote() {
   const entity = 'quote';
 
   const searchConfig = {
-    entity: 'client',
+    entity: 'people',
     displayLabels: ['name'],
     searchFields: ['name'],
   };
-  const deleteModalLabels = ['number', 'client.name'];
+  const deleteModalLabels = ['number', 'people.name'];
   const dataTableColumns = [
     {
       title: translate('Year'),
@@ -24,7 +24,7 @@ export default function Quote() {
     },
     {
       title: translate('Client'),
-      dataIndex: ['client', 'name'],
+      dataIndex: ['people', 'name'],
       fixed: 'left',
     },
     {
@@ -53,7 +53,7 @@ export default function Quote() {
     },
     {
       title: translate('Destination'),
-      dataIndex: ['address'],
+      dataIndex: ['people', 'address'],
     },
     {
       title: translate('Description'),
@@ -66,15 +66,15 @@ export default function Quote() {
     },
     {
       title: translate('Quantity'),
-      dataIndex: ['quantity'],
+      dataIndex: ['totalQuantity'],
     },
     {
       title: translate('Amount W/O GST'),
-      dataIndex: ['quantity'],
+      dataIndex: 'subTotal',
     },
     {
-      title: translate('Feedback'),
-      dataIndex: 'status',
+      title: translate('Quote Status'),
+      dataIndex: 'quoteStatus',
       render: (status) => {
         let tagStatus = tagColor(status);
 
@@ -87,8 +87,8 @@ export default function Quote() {
       },
     },
     {
-      title: translate('Status'),
-      dataIndex: 'status',
+      title: translate('Delivery Status'),
+      dataIndex: 'deliveryStatus',
       render: (status) => {
         let tagStatus = tagColor(status);
 
@@ -102,34 +102,22 @@ export default function Quote() {
     },
     {
       title: translate('Purchase Order #'),
-      dataIndex: ['address'],
+      dataIndex: ['po_number'],
     },
-    {
-      title: translate('Invoice #'),
-      dataIndex: ['address'],
-    },
-    {
-      title: translate('Vendor Name'),
-      dataIndex: ['address'],
-    },
-    {
-      title: translate('Vendor Inv #'),
-      dataIndex: ['address'],
-    },
-    {
-      title: translate('Payment Status'),
-      dataIndex: 'status',
-      render: (status) => {
-        let tagStatus = tagColor(status);
+    // {
+    //   title: translate('Payment Status'),
+    //   dataIndex: 'status',
+    //   render: (status) => {
+    //     let tagStatus = tagColor(status);
 
-        return (
-          <Tag color={tagStatus.color}>
-            {/* {tagStatus.icon + ' '} */}
-            {status && translate(tagStatus.label)}
-          </Tag>
-        );
-      },
-    },
+    //     return (
+    //       <Tag color={tagStatus.color}>
+    //         {/* {tagStatus.icon + ' '} */}
+    //         {status && translate(tagStatus.label)}
+    //       </Tag>
+    //     );
+    //   },
+    // },
   ];
 
   const Labels = {

@@ -29,9 +29,9 @@ const quoteSchema = new mongoose.Schema({
     required: true,
   },
 
-  client: {
+  people: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Client',
+    ref: 'People',
     required: true,
     autopopulate: true,
   },
@@ -79,6 +79,9 @@ const quoteSchema = new mongoose.Schema({
       },
     },
   ],
+  totalQuantity: {
+    type: Number,
+  },
   taxRate: {
     type: Number,
   },
@@ -119,18 +122,19 @@ const quoteSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  status: {
+  quoteStatus: {
     type: String,
-    enum: ['draft', 'pending', 'sent', 'accepted', 'declined', 'cancelled', 'on hold'],
-    default: 'draft',
+    enum: ['draft', 'pending', 'sent', 'approved', 'declined', 'cancelled', 'on hold'],
+    default: 'pending',
   },
-  approved: {
-    type: Boolean,
-    default: false,
+  deliveryStatus: {
+    type: String,
+    enum: ['draft', 'pending', 'delivered', 'declined', 'cancelled', 'returned', 'on hold'],
+    default: 'pending',
   },
-  isExpired: {
-    type: Boolean,
-    default: false,
+  po_number: {
+    type: Number,
+    required: false,
   },
   pdf: {
     type: String,

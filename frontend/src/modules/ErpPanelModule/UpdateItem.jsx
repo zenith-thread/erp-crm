@@ -46,12 +46,15 @@ export default function UpdateItem({ config, UpdateForm }) {
   const [totalExpense, setTotalExpense] = useState(0);
 
   const resetErp = {
-    status: '',
-    client: {
+    quoteStatus: '',
+    deliveryStatus: '',
+    people: {
       name: '',
       email: '',
       phone: '',
       address: '',
+      city: '',
+      country: '',
     },
     subTotal: 0,
     taxRate: 0,
@@ -62,6 +65,7 @@ export default function UpdateItem({ config, UpdateForm }) {
     credit: 0,
     number: 0,
     year: 0,
+    po_number: 0,
   };
 
   const [currentErp, setCurrentErp] = useState(current ?? resetErp);
@@ -75,10 +79,8 @@ export default function UpdateItem({ config, UpdateForm }) {
     let totalTransportCost = 0;
     let totalExpense = 0;
 
-    console.log('UPDATE WALI VALUES: ', items);
     if (items) {
       items.map((item) => {
-        console.log('UPDATE WALI INDIVIDUAL ITEM: ', item);
         if (item) {
           if (item.quantity && item.price) {
             item['total'] = calculate.multiply(item['quantity'], item['price']);
@@ -141,7 +143,6 @@ export default function UpdateItem({ config, UpdateForm }) {
             profit,
             unit_size,
           } = item;
-          // console.log('BHAI TOTAL DEKHO: ', total);
           let total = quantity * price;
           total = total + transportation;
           total = total + misc_expenses;
@@ -185,13 +186,10 @@ export default function UpdateItem({ config, UpdateForm }) {
     if (current) {
       setCurrentErp(current);
       let formData = { ...current };
-      console.log('formData k andar total vlaue: ', formData);
       if (formData.date) {
-        console.log('Date value:', formData.date);
         formData.date = dayjs(formData.date);
       }
       if (formData.priceValidity && dayjs(formData.priceValidity).isValid()) {
-        console.log('Expired Date value:', formData.priceValidity);
         formData.priceValidity = dayjs(formData.priceValidity);
       }
       if (!formData.taxRate) {
@@ -215,14 +213,9 @@ export default function UpdateItem({ config, UpdateForm }) {
         title={translate('update')}
         ghost={false}
         tags={[
-          <Tag color={tagColor(currentErp.status)?.color} key="status">
-            {currentErp.status && translate(currentErp.status)}
+          <Tag color={tagColor(currentErp.quoteStatus)?.color} key="quoteStatus">
+            {currentErp.quoteStatus && translate(currentErp.quoteStatus)}
           </Tag>,
-          currentErp.paymentStatus && (
-            <Tag color={tagColor(currentErp.paymentStatus)?.color} key="paymentStatus">
-              {currentErp.paymentStatus && translate(currentErp.paymentStatus)}
-            </Tag>
-          ),
         ]}
         extra={[
           <Button

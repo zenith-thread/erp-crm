@@ -19,10 +19,6 @@ const colours = {
 
 const defaultStatistics = [
   {
-    tag: 'draft',
-    value: 0,
-  },
-  {
     tag: 'pending',
     value: 0,
   },
@@ -31,7 +27,7 @@ const defaultStatistics = [
     value: 0,
   },
   {
-    tag: 'accepted',
+    tag: 'approved',
     value: 0,
   },
   {
@@ -39,7 +35,11 @@ const defaultStatistics = [
     value: 0,
   },
   {
-    tag: 'expired',
+    tag: 'cancelled',
+    value: 0,
+  },
+  {
+    tag: 'on hold',
     value: 0,
   },
 ];

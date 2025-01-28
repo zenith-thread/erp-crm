@@ -16,34 +16,6 @@ const schema = new mongoose.Schema({
   ntnNumber: {
     type: String,
   },
-  bankAccountTitle: {
-    type: String,
-    trim: true,
-  },
-  bankName: {
-    type: String,
-    trim: true,
-  },
-  bankBranch: {
-    type: String,
-    trim: true,
-  },
-  bankIban: {
-    type: String,
-    trim: true,
-  },
-  bankSwift: {
-    type: String,
-    trim: true,
-  },
-  bankAccountNumber: {
-    type: String,
-    trim: true,
-  },
-  bankCode: {
-    type: String,
-    trim: true,
-  },
   address: {
     type: String,
   },

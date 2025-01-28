@@ -97,16 +97,16 @@ export default function DashboardModule() {
 
   const entityData = [
     {
-      result: invoiceResult,
-      isLoading: invoiceLoading,
-      entity: 'invoice',
-      title: translate('Invoices'),
-    },
-    {
       result: quoteResult,
       isLoading: quoteLoading,
       entity: 'quote',
       title: translate('Quotations'),
+    },
+    {
+      result: invoiceResult,
+      isLoading: invoiceLoading,
+      entity: 'invoice',
+      title: translate('Invoices'),
     },
     {
       result: offerResult,

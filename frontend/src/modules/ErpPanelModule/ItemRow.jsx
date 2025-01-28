@@ -55,7 +55,6 @@ export default function ItemRow({ field, remove, current = null }) {
       // and if it doesn't we can access invoice.items.
 
       const { items, invoice } = current;
-      console.log('TOTAL CHECK KR RHA HN BEFORE AND AFTER UPDATE: ', items);
 
       if (invoice) {
         const item = invoice[field.fieldKey];
@@ -106,8 +105,8 @@ export default function ItemRow({ field, remove, current = null }) {
   ]);
 
   return (
-    <Row gutter={[12, 12]} style={{ position: 'relative' }}>
-      <Col className="gutter-row" span={5}>
+    <Row gutter={[12, 4]} style={{ position: 'relative' }}>
+      <Col className="gutter-row" span={5.5}>
         <Form.Item
           name={[field.name, 'product']}
           label="Product"

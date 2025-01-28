@@ -14,6 +14,7 @@ const create = async (req, res) => {
   let taxTotal = 0;
   let taxTotal2 = 0;
   let total = 0;
+  let totalQuantity = 0;
   // let credit = 0;
 
   //Calculate the items array with subTotal, total, taxTotal
@@ -34,6 +35,7 @@ const create = async (req, res) => {
     subTotal = calculate.add(subTotal, total);
     //item total
     item['total'] = total;
+    totalQuantity = calculate.add(totalQuantity, item['quantity']);
   });
   taxTotal = calculate.multiply(subTotal, taxRate / 100);
   total = calculate.add(subTotal, taxTotal);
@@ -48,6 +50,7 @@ const create = async (req, res) => {
   body['taxTotal2'] = taxTotal2;
   body['items'] = items;
   body['createdBy'] = req.admin._id;
+  body['totalQuantity'] = totalQuantity;
 
   // Creating a new document in the collection
   const result = await new Model(body).save();

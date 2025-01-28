@@ -105,7 +105,6 @@ export default function ReadItem({ config, selectedItem }) {
   const { entity, ENTITY_NAME } = config;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const { moneyFormatter } = useMoney();
   const { send, isLoading: mailInProgress } = useMail({ entity });
 
@@ -113,12 +112,15 @@ export default function ReadItem({ config, selectedItem }) {
   console.log('Current Item from Redux:', currentResult);
 
   const resetErp = {
-    status: '',
-    client: {
+    quoteStatus: '',
+    deliveryStatus: '',
+    people: {
       name: '',
       email: '',
       phone: '',
       address: '',
+      city: '',
+      country: '',
     },
     subTotal: 0,
     taxRate: 0,
@@ -129,6 +131,7 @@ export default function ReadItem({ config, selectedItem }) {
     credit: 0,
     number: 0,
     year: 0,
+    po_number: 0,
   };
 
   const [itemslist, setItemsList] = useState([]);
@@ -154,8 +157,8 @@ export default function ReadItem({ config, selectedItem }) {
   }, [currentResult]);
 
   useEffect(() => {
-    if (currentErp?.client) {
-      setClient(currentErp.client[currentErp.client.type]);
+    if (currentErp?.people) {
+      setClient(currentErp.people[currentErp.people]);
     }
   }, [currentErp]);
 
@@ -281,10 +284,12 @@ export default function ReadItem({ config, selectedItem }) {
         </Row>
       </PageHeader>
       <Divider dashed />
-      <Descriptions title={`Client : ${currentErp.client.name}`}>
-        <Descriptions.Item label={translate('Address')}>{client.address}</Descriptions.Item>
-        <Descriptions.Item label={translate('email')}>{client.email}</Descriptions.Item>
-        <Descriptions.Item label={translate('Phone')}>{client.phone}</Descriptions.Item>
+      <Descriptions title={`Client : ${currentErp.people.name}`}>
+        <Descriptions.Item label={translate('Address')}>
+          {currentErp.people.address}
+        </Descriptions.Item>
+        <Descriptions.Item label={translate('email')}>{currentErp.people.email}</Descriptions.Item>
+        <Descriptions.Item label={translate('Phone')}>{currentErp.people.phone}</Descriptions.Item>
       </Descriptions>
       <Divider />
       <Row gutter={[12, 0]}>
