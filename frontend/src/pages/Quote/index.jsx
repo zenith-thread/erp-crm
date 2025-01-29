@@ -56,13 +56,14 @@ export default function Quote() {
       dataIndex: ['people', 'address'],
     },
     {
-      title: translate('Description'),
-      dataIndex: ['ref'],
-      width: 300,
-    },
-    {
       title: translate('HS Code'),
-      dataIndex: ['number'],
+      dataIndex: ['items'],
+      render: (items) => {
+        // Extract all hs_code values from the items array
+        const hsCodes = items.map((item) => item.product.hs_code).join(', ');
+
+        return hsCodes || '-'; // If no hs_code exists, show '-'
+      },
     },
     {
       title: translate('Quantity'),

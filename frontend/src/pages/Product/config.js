@@ -1,4 +1,8 @@
 export const fields = {
+  hs_code: {
+    type: 'string',
+    required: true,
+  },
   name: {
     type: 'string',
     required: true,
@@ -11,15 +15,12 @@ export const fields = {
     entity: 'productcategory',
     required: true,
   },
-
-  price: {
-    type: 'currency',
-    required: true,
-  },
-  description: {
-    type: 'textarea',
-  },
-  ref: {
-    type: 'string',
+  productVendor: {
+    type: 'async',
+    label: 'Vendor',
+    displayLabels: ['company', 'name'],
+    dataIndex: ['company', 'name'],
+    entity: 'company',
+    required: false,
   },
 };

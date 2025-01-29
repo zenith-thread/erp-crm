@@ -21,9 +21,16 @@ import { selectListItems } from '@/redux/erp/selectors';
 import { useErpContext } from '@/context/erp';
 import { generate as uniqueId } from 'shortid';
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { useDate } from '@/settings';
 
 import { DOWNLOAD_BASE_URL } from '@/config/serverApiConfig';
 import { selectLangDirection } from '@/redux/translate/selectors';
+
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 function AddNewItem({ config }) {
   const navigate = useNavigate();
@@ -41,6 +48,7 @@ function AddNewItem({ config }) {
 }
 
 export default function DataTable({ config, extra = [] }) {
+  const { dateFormat } = useDate();
   const translate = useLanguage();
   let { entity, dataTableColumns, disableAdd = false, searchConfig } = config;
 
@@ -49,10 +57,111 @@ export default function DataTable({ config, extra = [] }) {
   const { result: listResult, isLoading: listIsLoading } = useSelector(selectListItems);
 
   const { pagination, items: dataSource } = listResult;
-  console.log('LIST ITEMS FOR DATA TABLE: ', dataSource);
 
   const { erpContextAction } = useErpContext();
   const { modal } = erpContextAction;
+
+  // 📌 FUNCTION TO EXPORT EXCEL
+  const exportToExcel = (data = []) => {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.warn('No data available to export.');
+      return;
+    }
+
+    console.log('Raw Data:', data); // Debugging
+
+    const formattedData = data.map((record) => ({
+      Year: record?.year || '-',
+      Client: record?.people?.name || '-',
+      'Quote Ref #': record?.number || '-',
+      Date: record?.date ? dayjs(record.date).format(dateFormat) : '-',
+      'Expiry Date': record?.priceValidity ? dayjs(record.priceValidity).format(dateFormat) : '-',
+      'PR #': record?.ref || '-',
+      Destination: record?.people?.address || '-',
+      'HS Code': record?.items
+        ? record.items.map((item) => item?.product?.hs_code || '-').join(', ')
+        : '-',
+      Quantity: record?.totalQuantity || '-',
+      'Amount W/O GST': record?.subTotal || '-',
+      'Quote Status': record?.quoteStatus || '-',
+      'Delivery Status': record?.deliveryStatus || '-',
+      'Purchase Order #': record?.po_number || '-',
+    }));
+
+    console.log('Formatted Data for Excel:', formattedData); // Debugging
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Quotes');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, 'Quotes.xlsx');
+  };
+
+  // 📌 FUNCTION TO EXPORT PDF
+  const exportToPDF = (data) => {
+    const doc = new jsPDF('landscape');
+    doc.text('Quote List', 14, 10);
+
+    const tableData = data.map((record) => [
+      record.year,
+      record.people?.name || '-',
+      record.number,
+      dayjs(record.date).format(dateFormat),
+      dayjs(record.expiredDate).format(dateFormat),
+      record.ref || '-',
+      record.people?.address || '-',
+      record.items.map((item) => item.product.hs_code).join(', ') || '-',
+      record.totalQuantity,
+      record.subTotal,
+      record.quoteStatus,
+      record.deliveryStatus,
+      record.po_number || '-',
+    ]);
+
+    doc.autoTable({
+      head: [
+        [
+          'Year',
+          'Client',
+          'Quote Ref #',
+          'Date',
+          'Expiry Date',
+          'PR #',
+          'Destination',
+          'HS Code',
+          'Quantity',
+          'Amount W/O GST',
+          'Quote Status',
+          'Delivery Status',
+          'Purchase Order #',
+        ],
+      ],
+      body: tableData,
+      startY: 20,
+      columnStyles: {
+        0: { cellWidth: 10, overflow: 'linebreak' }, // Year
+        1: { cellWidth: 20, overflow: 'linebreak' }, // Client
+        2: { cellWidth: 20, overflow: 'linebreak' }, // Quote Ref #
+        3: { cellWidth: 20, overflow: 'linebreak' }, // Date
+        4: { cellWidth: 20, overflow: 'linebreak' }, // Expiry Date
+        5: { cellWidth: 20, overflow: 'linebreak' }, // PR #
+        6: { cellWidth: 35, overflow: 'linebreak' }, // Destination
+        7: { cellWidth: 20, overflow: 'linebreak' }, // HS Code
+        8: { cellWidth: 20, overflow: 'linebreak' }, // Quantity
+        9: { cellWidth: 25, overflow: 'linebreak' }, // Amount W/O GST
+        10: { cellWidth: 20, overflow: 'linebreak' }, // Quote Status
+        11: { cellWidth: 20, overflow: 'linebreak' }, // Delivery Status
+        12: { cellWidth: 20, overflow: 'linebreak' }, // Purchase Order #
+      },
+      styles: {
+        fontSize: 8, // Decrease font size
+      },
+    });
+
+    doc.save('Quotes.pdf');
+  };
 
   const items = [
     {
@@ -197,14 +306,30 @@ export default function DataTable({ config, extra = [] }) {
           <Button onClick={handelDataTableLoad} key={`${uniqueId()}`} icon={<RedoOutlined />}>
             {translate('Refresh')}
           </Button>,
-
           !disableAdd && <AddNewItem config={config} key={`${uniqueId()}`} />,
         ]}
         style={{
           padding: '20px 0px',
           direction: langDirection,
         }}
-      ></PageHeader>
+      >
+        <Button
+          type="primary"
+          onClick={() => exportToExcel(dataSource)}
+          disabled={!dataSource || dataSource.length === 0}
+        >
+          📊 Export to Excel
+        </Button>
+        <Button
+          type="primary"
+          style={{ marginLeft: 10 }}
+          onClick={() => exportToPDF(dataSource)}
+          disabled={!dataSource || dataSource.length === 0}
+        >
+          📄 Export to PDF
+        </Button>
+        ,
+      </PageHeader>
 
       <Table
         columns={dataTableColumns}

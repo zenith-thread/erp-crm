@@ -8,10 +8,10 @@ export default function Product() {
   const translate = useLanguage();
   const entity = 'product';
   const searchConfig = {
-    displayLabels: ['name'],
-    searchFields: 'name',
+    displayLabels: ['hs_code', 'name'],
+    searchFields: ['hs_code', 'name'],
   };
-  const deleteModalLabels = ['name'];
+  const deleteModalLabels = ['hs_code', 'name'];
 
   const Labels = {
     PANEL_TITLE: translate('Product'),

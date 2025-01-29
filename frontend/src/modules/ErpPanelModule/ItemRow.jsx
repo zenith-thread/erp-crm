@@ -120,8 +120,8 @@ export default function ItemRow({ field, remove, current = null }) {
           <AutoCompleteAsync
             entity={'product'}
             displayLabels={['name']}
-            searchFields={'name'}
-            outputValue={'name'}
+            searchFields={['name', 'hs_code']}
+            // outputValue={['_id']}
             redirectLabel={'Add New Product'}
             withRedirect
             urlToRedirect={'/product'}

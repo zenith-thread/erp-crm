@@ -16,73 +16,20 @@ const schema = new mongoose.Schema({
     required: true,
     autopopulate: true,
   },
-  suppliers: [{ type: mongoose.Schema.ObjectId, ref: 'Supplier' }],
+  productVendor: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Company',
+    required: true,
+    autopopulate: true,
+  },
   name: {
     type: String,
     required: true,
   },
-  description: String,
-  number: {
-    type: Number,
-  },
-  title: String,
-  tags: [String],
-  headerImage: String,
-  photo: String,
-  images: [
-    {
-      id: String,
-      name: String,
-      path: String,
-      description: String,
-      isPublic: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
-  files: [
-    {
-      id: String,
-      name: String,
-      path: String,
-      description: String,
-      isPublic: {
-        type: Boolean,
-        default: false,
-      },
-    },
-  ],
-  priceBeforeTax: {
-    type: Number,
-  },
-  taxRate: { type: Number, default: 0 },
-  price: {
-    type: Number,
-    required: true,
-  },
-  currency: {
+  hs_code: {
     type: String,
-    default: 'NA',
-    uppercase: true,
     required: true,
   },
-  customField: [
-    {
-      fieldName: {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-      fieldType: {
-        type: String,
-        trim: true,
-        lowercase: true,
-        default: 'string',
-      },
-      fieldValue: {},
-    },
-  ],
   created: {
     type: Date,
     default: Date.now,

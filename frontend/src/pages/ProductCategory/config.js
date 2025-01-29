@@ -7,15 +7,16 @@ export const fields = {
   },
   description: {
     type: 'textarea',
-    required: true,
+    required: false,
   },
   color: {
     type: 'color',
     options: [...color],
-    required: true,
+    required: false,
   },
   enabled: {
     type: 'boolean',
-    required: true,
+    required: false,
+    default: true,
   },
 };

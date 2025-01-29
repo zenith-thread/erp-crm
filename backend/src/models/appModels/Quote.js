@@ -38,8 +38,10 @@ const quoteSchema = new mongoose.Schema({
   items: [
     {
       product: {
-        type: String,
+        type: mongoose.Schema.ObjectId,
+        ref: 'Product',
         required: true,
+        autopopulate: true,
       },
       unit_size: {
         type: String,
