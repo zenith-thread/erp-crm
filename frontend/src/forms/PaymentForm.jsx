@@ -20,7 +20,7 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
         initialValue={1}
         rules={[
           {
-            required: true,
+            required: false,
           },
         ]}
         style={{ width: '50%', float: 'left', paddingRight: '20px' }}
@@ -32,7 +32,7 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
         label={translate('date')}
         rules={[
           {
-            required: true,
+            required: false,
             type: 'object',
           },
         ]}
@@ -41,7 +41,7 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
       >
         <DatePicker format={dateFormat} style={{ width: '100%' }} />
       </Form.Item>
-      <Form.Item label={translate('amount')} name="amount" rules={[{ required: true }]}>
+      <Form.Item label={translate('amount')} name="amount" rules={[{ required: false }]}>
         <InputNumber
           className="moneyInput"
           min={0}
@@ -56,7 +56,7 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
         name="paymentMode"
         rules={[
           {
-            required: true,
+            required: false,
           },
         ]}
       >

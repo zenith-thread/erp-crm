@@ -12,7 +12,7 @@ const listAll = require('./listAll');
 const paginatedList = require('./paginatedList');
 
 function modelController() {
-  const modelName = 'Lead';
+  const modelName = 'DeliveryChallan';
   const Model = mongoose.model(modelName);
   const methods = createCRUDController(modelName);
   methods.read = (req, res) => read(Model, req, res);

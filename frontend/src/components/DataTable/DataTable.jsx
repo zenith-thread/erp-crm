@@ -176,13 +176,13 @@ export default function DataTable({ config, extra = [] }) {
     };
   }, []);
 
-  const langDirection=useSelector(selectLangDirection)
+  const langDirection = useSelector(selectLangDirection);
 
   return (
     <>
       <PageHeader
         onBack={() => window.history.back()}
-        backIcon={langDirection==="rtl"?<ArrowRightOutlined/>:<ArrowLeftOutlined />}
+        backIcon={langDirection === 'rtl' ? <ArrowRightOutlined /> : <ArrowLeftOutlined />}
         title={DATATABLE_TITLE}
         ghost={false}
         extra={[
@@ -200,7 +200,7 @@ export default function DataTable({ config, extra = [] }) {
         ]}
         style={{
           padding: '20px 0px',
-          direction:langDirection
+          direction: langDirection,
         }}
       ></PageHeader>
 

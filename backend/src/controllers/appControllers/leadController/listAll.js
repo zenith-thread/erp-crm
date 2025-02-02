@@ -1,28 +1,43 @@
 const { migrate } = require('./migrate');
 
 const listAll = async (Model, req, res) => {
-  const sort = parseInt(req.query.sort) || 'desc';
+  try {
+    const sortDirection = parseInt(req.query.sort) || -1; // Default descending
+    const sortField = req.query.sortBy || 'date'; // Default sort by delivery date
 
-  //  Query the database for a list of all results
-  const result = await Model.find({
-    removed: false,
-  })
-    .sort({ created: sort })
-    .populate()
-    .exec();
+    const results = await Model.find({ removed: false })
+      .sort({ [sortField]: sortDirection })
+      .populate('people', 'name email phone')
+      .populate('items.product', 'name hs_code unit_size')
+      .populate('converted.quote', 'number year')
+      .lean();
 
-  const migratedData = result.map((x) => migrate(x));
-  if (result.length > 0) {
-    return res.status(200).json({
-      success: true,
-      result: migratedData,
-      message: 'Successfully found all documents',
-    });
-  } else {
-    return res.status(203).json({
-      success: true,
-      result: [],
-      message: 'Collection is Empty',
+    const migratedData = results.map((challan) => ({
+      ...migrate(challan),
+      totalItems: challan.items.length,
+      totalQuantity: challan.items.reduce((sum, item) => sum + (item.quantity || 0), 0),
+      paymentStatus: challan.paymentStatus || 'unpaid',
+    }));
+
+    if (migratedData.length > 0) {
+      return res.status(200).json({
+        success: true,
+        result: migratedData,
+        message: `Found ${migratedData.length} delivery challans`,
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        result: [],
+        message: 'No delivery challans found',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      result: null,
+      message: 'Internal server error',
+      error: error.message,
     });
   }
 };

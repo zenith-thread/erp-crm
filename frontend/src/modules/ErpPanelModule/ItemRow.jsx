@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { memo, useMemo, useCallback, useEffect } from 'react';
 import { Form, Input, InputNumber, Row, Col, Divider } from 'antd';
 
 import { DeleteOutlined } from '@ant-design/icons';
@@ -8,268 +8,285 @@ import calculate from '@/utils/calculate';
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
 import SelectAsync from '@/components/SelectAsync';
 
-export default function ItemRow({ field, remove, current = null }) {
-  const [price, setPrice] = useState(0);
-  const [quantity, setQuantity] = useState(0);
-  const [transportation, setTransportation] = useState(0);
-  const [miscExpenses, setMiscExpenses] = useState(0);
-  const [profit, setProfit] = useState(0);
+const MemoAutoComplete = memo(AutoCompleteAsync);
+const MemoSelectAsync = memo(SelectAsync);
 
-  const [individualTaxRate, setindividualTaxRate] = useState(0);
-  const [individualTaxRate2, setindividualTaxRate2] = useState(0);
-
-  const handelTaxChange = (value) => {
-    setindividualTaxRate(value / 100);
-  };
-
-  const handelTaxChange2 = (value) => {
-    setindividualTaxRate2(value / 100);
-  };
-
-  const [totalState, setTotal] = useState(0);
-
+function ItemRow({ field, remove, current }) {
+  const form = Form.useFormInstance();
   const money = useMoney();
 
-  const updateQt = (value) => {
-    setQuantity(value);
-  };
-  const updatePrice = (value) => {
-    setPrice(value);
-  };
-  const updateTransportation = (value) => {
-    setTransportation(value);
-  };
-  const updateMiscExpenses = (value) => {
-    setMiscExpenses(value);
-  };
-  const updateProfit = (value) => {
-    value = value / 100;
-    setProfit(value);
-  };
+  // Get all field values at once
+  const watchedValues = Form.useWatch([field.name], form) || {};
 
+  // Calculate total without side effects
+  const total = useMemo(() => {
+    let {
+      quantity = 0,
+      price = 0,
+      transportation = 0,
+      misc_expenses: miscExpenses = 0,
+      profit = 0,
+      individualTaxRate = 0,
+      individualTaxRate2 = 0,
+      ServiceCharge12Tax = 0,
+      serviceChargesAmount = 0,
+    } = watchedValues;
+
+    try {
+      if (!ServiceCharge12Tax) {
+        let currentTotal = calculate.multiply(price, quantity);
+        currentTotal = calculate.add(currentTotal, transportation);
+        currentTotal = calculate.add(currentTotal, miscExpenses);
+        currentTotal = calculate.add(currentTotal, currentTotal * (profit / 100));
+
+        const tax1 = calculate.multiply(currentTotal, individualTaxRate / 100);
+        const tax2 = calculate.multiply(
+          calculate.add(currentTotal, tax1),
+          individualTaxRate2 / 100
+        );
+
+        return Math.ceil(calculate.add(currentTotal, tax1, tax2));
+      } else {
+        let currentTotal = calculate.multiply(price, quantity);
+
+        serviceChargesAmount = calculate.multiply(currentTotal, ServiceCharge12Tax / 100);
+        return Math.ceil(calculate.add(currentTotal, serviceChargesAmount));
+      }
+    } catch (error) {
+      return 0;
+    }
+  }, [watchedValues]);
+
+  // Update form field after calculations
+  useEffect(() => {
+    const { quantity = 0 } = watchedValues;
+
+    form.setFieldsValue({
+      [field.name]: {
+        ...watchedValues,
+        total,
+        quoteAmount: quantity ? (total / quantity).toFixed(2) : 0,
+      },
+    });
+  }, [total]);
+
+  // Value handler with proper decimal handling
+  const createValueHandler = useCallback(
+    (fieldName, factor = 1) => ({
+      value: (watchedValues[fieldName] ?? 0) * factor,
+      onChange: (value) => {
+        const normalizedValue = typeof value === 'number' ? value / factor : 0;
+        form.setFieldsValue({
+          [field.name]: {
+            ...watchedValues,
+            [fieldName]: normalizedValue,
+          },
+        });
+      },
+    }),
+    [form, field.name, watchedValues]
+  );
+
+  // Initial data load
   useEffect(() => {
     if (current) {
-      // When it accesses the /payment/ endpoint,
-      // it receives an invoice.item instead of just item
-      // and breaks the code, but now we can check if items exists,
-      // and if it doesn't we can access invoice.items.
-
-      const { items, invoice } = current;
-
-      if (invoice) {
-        const item = invoice[field.fieldKey];
-
-        if (item) {
-          setQuantity(item.quantity);
-          setPrice(item.price);
-          setTransportation(item.transportation);
-          setMiscExpenses(item.miscExpenses);
-          setProfit(item.profit);
-          setTotal(item.total);
-        }
-      } else {
-        const item = items[field.fieldKey];
-
-        if (item) {
-          setQuantity(item.quantity);
-          setPrice(item.price);
-          setTransportation(item.transportation);
-          setMiscExpenses(item.miscExpenses);
-          setProfit(item.profit);
-          setTotal(item.total);
-        }
+      const source = current.invoice?.[field.fieldKey] || current.items?.[field.fieldKey];
+      if (source) {
+        // Preserve existing values when loading
+        form.setFieldsValue({
+          [field.name]: {
+            ...form.getFieldValue([field.name]), // Keep current values
+            ...source, // Apply loaded values
+            individualTaxRate: (source.individualTaxRate || 0) * 100,
+            individualTaxRate2: (source.individualTaxRate2 || 0) * 100,
+            ServiceCharge12Tax: (source.ServiceCharge12Tax || 0) * 100,
+            profit: (source.profit || 0) * 100,
+          },
+        });
       }
     }
   }, [current]);
 
-  useEffect(() => {
-    let currentTotal = calculate.multiply(price, quantity);
-    currentTotal = calculate.add(currentTotal, transportation);
-    currentTotal = calculate.add(currentTotal, miscExpenses);
-    currentTotal = calculate.add(currentTotal, currentTotal * profit);
-    let preTaxCost = currentTotal;
-    currentTotal = calculate.add(calculate.multiply(currentTotal, individualTaxRate), currentTotal);
-    currentTotal = calculate.multiply(currentTotal, individualTaxRate2);
-
-    preTaxCost = Math.ceil(preTaxCost + currentTotal);
-
-    setTotal(preTaxCost);
-  }, [
-    price,
-    quantity,
-    transportation,
-    miscExpenses,
-    profit,
-    individualTaxRate,
-    individualTaxRate2,
-  ]);
-
   return (
     <Row gutter={[12, 4]} style={{ position: 'relative' }}>
-      <Col className="gutter-row" span={5.5}>
+      <Col span={7}>
         <Form.Item
           name={[field.name, 'product']}
-          label="Product"
-          rules={[
-            {
-              required: true,
-              message: 'Please select a product',
-            },
-          ]}
+          label="Description"
+          rules={[{ required: true, message: 'Description' }]}
         >
-          <AutoCompleteAsync
-            entity={'product'}
+          <MemoAutoComplete
+            entity="product"
             displayLabels={['name']}
             searchFields={['name', 'hs_code']}
-            // outputValue={['_id']}
-            redirectLabel={'Add New Product'}
+            redirectLabel="Add New Product"
             withRedirect
-            urlToRedirect={'/product'}
+            urlToRedirect="/product"
           />
         </Form.Item>
       </Col>
 
-      <Col className="gutter-row" span={10}>
-        <Form.Item name={[field.name, 'description']} label="Description">
-          <Input />
-        </Form.Item>
-      </Col>
-      <Col className="gutter-row" span={4}>
+      <Col span={4}>
         <Form.Item name={[field.name, 'unit_size']} label="Unit Size">
           <Input />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={4}>
-        <Form.Item name={[field.name, 'quantity']} rules={[{ required: true }]} label="Quantity">
-          <InputNumber style={{ width: '100%' }} min={0} onChange={updateQt} />
+
+      <Col span={4}>
+        <Form.Item name={[field.name, 'quantity']} label="Quantity" rules={[{ required: true }]}>
+          <InputNumber min={0} style={{ width: '100%' }} />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={5}>
-        <Form.Item name={[field.name, 'price']} rules={[{ required: true }]} label="Unit Price">
+
+      <Col span={5}>
+        <Form.Item name={[field.name, 'price']} label="Unit Price" rules={[{ required: true }]}>
           <InputNumber
-            className="moneyInput"
-            onChange={updatePrice}
             min={0}
             controls={false}
-            addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
-            addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
+            {...createValueHandler('price')}
+            className="moneyInput"
+            addonAfter={money.currency_position === 'after' && money.currency_symbol}
+            addonBefore={money.currency_position === 'before' && money.currency_symbol}
           />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={4}>
+
+      <Col span={4}>
         <Form.Item
           name={[field.name, 'transportation']}
-          rules={[{ required: true }]}
           label="Transportation"
+          rules={[{ required: false }]}
         >
           <InputNumber
-            className="moneyInput"
-            onChange={updateTransportation}
             min={0}
             controls={false}
-            addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
-            addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
+            {...createValueHandler('transportation')}
+            className="moneyInput"
+            addonAfter={money.currency_position === 'after' && money.currency_symbol}
+            addonBefore={money.currency_position === 'before' && money.currency_symbol}
           />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={4}>
+
+      <Col span={4}>
         <Form.Item
           name={[field.name, 'misc_expenses']}
-          rules={[{ required: false }]}
           label="Misc. Expenses"
+          rules={[{ required: false }]}
         >
           <InputNumber
-            className="moneyInput"
-            onChange={updateMiscExpenses}
             min={0}
             controls={false}
-            addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
-            addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
+            {...createValueHandler('misc_expenses')}
+            className="moneyInput"
+            addonAfter={money.currency_position === 'after' && money.currency_symbol}
+            addonBefore={money.currency_position === 'before' && money.currency_symbol}
           />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={3}>
-        <Form.Item name={[field.name, 'profit']} rules={[{ required: true }]} label="Profit">
+
+      <Col span={3}>
+        <Form.Item name={[field.name, 'profit']} label="Profit" rules={[{ required: false }]}>
           <InputNumber
-            className="moneyInput"
-            onChange={updateProfit}
             min={0}
             controls={false}
+            {...createValueHandler('profit', 100)}
+            className="moneyInput"
             addonBefore="%"
           />
         </Form.Item>
       </Col>
 
-      <Col className="gutter-row" span={3}>
+      <Col span={3}>
         <Form.Item
           name={[field.name, 'individualTaxRate']}
           label="GST"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: false }]}
         >
-          <SelectAsync
-            value={individualTaxRate}
-            onChange={handelTaxChange}
-            entity={'taxes'}
-            outputValue={'taxValue'}
+          <MemoSelectAsync
+            {...createValueHandler('individualTaxRate', 100)}
+            entity="taxes"
+            outputValue="taxValue"
             displayLabels={['taxName']}
-            withRedirect={true}
+            withRedirect
             urlToRedirect="/taxes"
-            redirectLabel={'Add New Tax'}
-            placeholder={'Select Tax Value'}
+            redirectLabel="Add New Tax"
+            placeholder="Select GST Tax"
           />
         </Form.Item>
       </Col>
 
-      <Col className="gutter-row" span={3}>
+      <Col span={3}>
         <Form.Item
           name={[field.name, 'individualTaxRate2']}
           label="WTH"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          rules={[{ required: false }]}
         >
-          <SelectAsync
-            value={individualTaxRate2}
-            onChange={handelTaxChange2}
-            entity={'taxes'}
-            outputValue={'taxValue'}
+          <MemoSelectAsync
+            {...createValueHandler('individualTaxRate2', 100)}
+            entity="taxes"
+            outputValue="taxValue"
             displayLabels={['taxName']}
-            withRedirect={true}
+            withRedirect
             urlToRedirect="/taxes"
-            redirectLabel={'Add New Tax'}
-            placeholder={'Select Tax Value'}
+            redirectLabel="Add New Tax"
+            placeholder="Select WTH Tax"
           />
         </Form.Item>
       </Col>
 
-      <Col className="gutter-row" span={7}>
-        <Form.Item name={[field.name, 'total']} label=" ">
-          <Form.Item>
-            <InputNumber
-              readOnly
-              className="moneyInput"
-              value={totalState}
-              min={0}
-              controls={false}
-              addonBefore="Total"
-              formatter={(value) =>
-                money.amountFormatter({ amount: value, currency_code: money.currency_code })
-              }
-            />
-          </Form.Item>
+      <Col span={4}>
+        <Form.Item
+          name={[field.name, 'ServiceCharge12Tax']}
+          label="Service Charge"
+          rules={[{ required: false }]}
+        >
+          <MemoSelectAsync
+            {...createValueHandler('ServiceCharge12Tax', 100)}
+            entity="taxes"
+            outputValue="taxValue"
+            displayLabels={['taxName']}
+            withRedirect
+            urlToRedirect="/taxes"
+            redirectLabel="Add New Tax"
+            placeholder="Select Service Charge"
+          />
         </Form.Item>
       </Col>
 
-      <div style={{ position: 'absolute', right: '-20px', top: ' 80px' }}>
+      <Col span={7}>
+        <Form.Item name={[field.name, 'total']} label=" ">
+          <InputNumber
+            readOnly
+            value={total}
+            className="moneyInput"
+            addonBefore="Total"
+            formatter={(value) =>
+              money.amountFormatter({
+                amount: value,
+                currency_code: money.currency_code,
+              })
+            }
+          />
+        </Form.Item>
+      </Col>
+      <Col className="gutter-row" span={4} style={{ display: 'none' }}>
+        <Form.Item name={[field.name, 'quoteAmount']} label="Unit Quote Amount">
+          <Input />
+        </Form.Item>
+      </Col>
+      <Col className="gutter-row" span={4} style={{ display: 'none' }}>
+        <Form.Item name={[field.name, 'serviceChargesAmount']} label="Service Charge Amount">
+          <Input />
+        </Form.Item>
+      </Col>
+
+      <div style={{ position: 'absolute', right: '-20px', top: '80px' }}>
         <DeleteOutlined onClick={() => remove(field.name)} />
       </div>
       <Divider dashed />
     </Row>
   );
 }
+
+export default memo(ItemRow);

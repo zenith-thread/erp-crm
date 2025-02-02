@@ -1,17 +1,41 @@
 const mongoose = require('mongoose');
 
-const quoteSchema = new mongoose.Schema({
+const deliveryChallanSchema = new mongoose.Schema({
   removed: {
     type: Boolean,
     default: false,
   },
+  removedAt: Date,
+  removedBy: { type: mongoose.Schema.ObjectId, ref: 'Admin' },
   createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin', required: true },
-
-  converted: {
-    type: Boolean,
-    default: false,
-  },
   number: {
+    type: Number,
+    required: true,
+  },
+  year: {
+    type: Number,
+    required: true,
+  },
+  content: String,
+  recurring: {
+    type: String,
+    enum: ['daily', 'weekly', 'monthly', 'annually', 'quarter'],
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  priceValidity: {
+    type: Date,
+    required: true,
+  },
+  people: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'People',
+    required: false,
+    autopopulate: true,
+  },
+  po_number: {
     type: String,
     required: false,
   },
@@ -19,25 +43,15 @@ const quoteSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  year: {
-    type: Number,
-    required: false,
-  },
-  content: String,
-  date: {
-    type: Date,
-    required: false,
-  },
-  priceValidity: {
-    type: Date,
-    required: false,
-  },
-
-  people: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'People',
-    required: true,
-    autopopulate: true,
+  converted: {
+    from: {
+      type: String,
+      enum: ['quote'],
+    },
+    quote: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Quote',
+    },
   },
   items: [
     {
@@ -75,17 +89,12 @@ const quoteSchema = new mongoose.Schema({
       },
       total: {
         type: Number,
+        required: true,
       },
       individualTaxRate2: {
         type: Number,
       },
       individualTaxRate: {
-        type: Number,
-      },
-      ServiceCharge12Tax: {
-        type: Number,
-      },
-      serviceChargesAmount: {
         type: Number,
       },
       quoteAmount: {
@@ -120,43 +129,51 @@ const quoteSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'Rs',
+    default: 'NA',
     uppercase: true,
-    required: false,
+    required: true,
   },
   discount: {
     type: Number,
     default: 0,
   },
-  payment_terms: {
+  payment: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Payment',
+    },
+  ],
+  paymentStatus: {
     type: String,
-    required: false,
-  },
-  delivery_terms: {
-    type: String,
-    required: false,
+    default: 'unpaid',
+    enum: ['unpaid', 'paid', 'partially'],
   },
   quoteStatus: {
     type: String,
     enum: ['draft', 'pending', 'sent', 'approved', 'declined', 'cancelled', 'on hold'],
-    default: 'pending',
-  },
-  generateDC: {
-    type: String,
-    enum: ['yes', 'no'],
-    default: 'yes',
-    required: false,
+    default: 'approved',
   },
   deliveryStatus: {
     type: String,
     enum: ['draft', 'pending', 'delivered', 'declined', 'cancelled', 'returned', 'on hold'],
     default: 'pending',
   },
-  po_number: {
-    type: String,
-    required: false,
+  isOverdue: {
+    type: Boolean,
+    default: false,
   },
-  scm: { type: mongoose.Schema.ObjectId, ref: 'Scm', required: true },
+  approved: {
+    type: Boolean,
+    default: false,
+  },
+  remarks: {
+    type: String,
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'pending', 'sent', 'refunded', 'cancelled', 'on hold'],
+    default: 'draft',
+  },
   pdf: {
     type: String,
   },
@@ -182,5 +199,5 @@ const quoteSchema = new mongoose.Schema({
   },
 });
 
-quoteSchema.plugin(require('mongoose-autopopulate'));
-module.exports = mongoose.model('Quote', quoteSchema);
+deliveryChallanSchema.plugin(require('mongoose-autopopulate'));
+module.exports = mongoose.model('DeliveryChallan', deliveryChallanSchema);

@@ -1,49 +1,65 @@
 const { migrate } = require('./migrate');
 
 const search = async (Model, req, res) => {
-  // if (req.query.q === undefined || req.query.q.trim() === '') {
-  //   return res
-  //     .status(202)
-  //     .json({
-  //       success: false,
-  //       result: [],
-  //       message: 'No document found by this request',
-  //     })
-  //     .end();
-  // }
-  const fieldsArray = req.query.fields ? req.query.fields.split(',') : ['name'];
+  const q = req.query.q?.trim();
 
-  const fields = { $or: [] };
-
-  for (const field of fieldsArray) {
-    fields.$or.push({ [field]: { $regex: new RegExp(req.query.q, 'i') } });
+  if (!q) {
+    return res.status(400).json({
+      success: false,
+      result: [],
+      message: 'Please provide a search query',
+    });
   }
-  // console.log(fields)
 
-  let results = await Model.find({
-    ...fields,
-  })
-    .where('removed', false)
-    .limit(20)
-    .exec();
+  // Default fields to search if none specified
+  const fieldsArray = req.query.fields
+    ? req.query.fields.split(',')
+    : ['number', 'year', 'content', 'notes', 'items.description', 'items.unit_size'];
 
-  const migratedData = results.map((x) => migrate(x));
+  const searchQuery = {
+    $or: fieldsArray.map((field) => {
+      // Handle numeric fields differently
+      if (['number', 'year'].includes(field)) {
+        if (!isNaN(q)) {
+          return { [field]: parseInt(q) };
+        }
+      }
+      return {
+        [field]: {
+          $regex: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+        },
+      };
+    }),
+    removed: false,
+  };
 
-  if (results.length >= 1) {
+  try {
+    const results = await Model.find(searchQuery)
+      .limit(20)
+      .sort('-date')
+      .populate('people', 'name')
+      .populate('items.product', 'name')
+      .lean();
+
+    const migratedData = results.map((challan) => ({
+      ...migrate(challan),
+      // Add quick summary calculations
+      itemCount: challan.items.length,
+      totalQuantity: challan.items.reduce((sum, item) => sum + (item.quantity || 0), 0),
+    }));
+
     return res.status(200).json({
       success: true,
       result: migratedData,
-      message: 'Successfully found all documents',
+      message: `Found ${migratedData.length} matching delivery challans`,
     });
-  } else {
-    return res
-      .status(202)
-      .json({
-        success: false,
-        result: [],
-        message: 'No document found by this request',
-      })
-      .end();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      result: [],
+      message: 'Error searching delivery challans',
+      error: error.message,
+    });
   }
 };
 

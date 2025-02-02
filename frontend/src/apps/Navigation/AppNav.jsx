@@ -27,6 +27,11 @@ const AppNav = ({ translate }) => [
     icon: <FileSyncOutlined />,
     label: <Link to={'/quote'}>{translate('quote')}</Link>,
   },
+  // {
+  //   key: 'delivery_challan',
+  //   icon: <FileOutlined />,
+  //   label: <Link to={'/invoice'}>{translate('delivery_challan')}</Link>,
+  // },
 
   {
     key: 'invoice',
@@ -48,11 +53,11 @@ const AppNav = ({ translate }) => [
     icon: <CustomerServiceOutlined />,
     label: <Link to={'/customer'}>{translate('customer')}</Link>,
   },
-  // {
-  //   key: 'lead',
-  //   icon: <FilterOutlined />,
-  //   label: <Link to={'/lead'}>{translate('lead')}</Link>,
-  // },
+  {
+    key: 'deliveryChallan',
+    icon: <FilterOutlined />,
+    label: <Link to={'/lead'}>{translate('deliveryChallan')}</Link>,
+  },
   // {
   //   key: 'offer',
   //   icon: <FileOutlined />,
@@ -121,6 +126,10 @@ const AppNav = ({ translate }) => [
       {
         key: 'advancedSettings',
         label: <Link to={'/settings/advanced'}>{translate('advanced_settings')}</Link>,
+      },
+      {
+        key: 'scm',
+        label: <Link to={'/scm'}>{translate('SCM Solutions Details')}</Link>,
       },
     ],
   },

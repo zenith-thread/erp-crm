@@ -44,6 +44,8 @@ export default function UpdateItem({ config, UpdateForm }) {
   const [totalProductPrice, setTotalProductPrice] = useState(0);
   const [totalTransportCost, setTotalTransportCost] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [quoteAmount, setQuoteAmount] = useState(0);
 
   const resetErp = {
     quoteStatus: '',
@@ -55,6 +57,7 @@ export default function UpdateItem({ config, UpdateForm }) {
       address: '',
       city: '',
       country: '',
+      ntnNumner: '',
     },
     subTotal: 0,
     taxRate: 0,
@@ -66,6 +69,11 @@ export default function UpdateItem({ config, UpdateForm }) {
     number: 0,
     year: 0,
     po_number: 0,
+    pr_number: 0,
+    ServiceCharge12Tax: 0,
+    serviceChargesAmount: 0,
+    quoteAmount: 0,
+    totalQuantity: 0,
   };
 
   const [currentErp, setCurrentErp] = useState(current ?? resetErp);
@@ -78,11 +86,25 @@ export default function UpdateItem({ config, UpdateForm }) {
     let totalProductPrice = 0;
     let totalTransportCost = 0;
     let totalExpense = 0;
+    let totalquantity = 0;
 
     if (items) {
       items.map((item) => {
         if (item) {
-          if (item.quantity && item.price) {
+          if (item.ServiceCharge12Tax) {
+            // Service Charge Calculation
+            item['total'] = calculate.multiply(item['quantity'], item['price']);
+            item['serviceChargesAmount'] = calculate.multiply(
+              item['total'],
+              item['ServiceCharge12Tax'] / 100
+            );
+            item['total'] = Math.ceil(calculate.add(item['total'], item['serviceChargesAmount']));
+
+            // Quote Amount
+            item['quoteAmount'] =
+              item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
+          } else {
+            // Individual Taxes Calculation
             item['total'] = calculate.multiply(item['quantity'], item['price']);
             item['total'] = calculate.add(item['total'], item['transportation']);
             item['total'] = calculate.add(item['total'], item['misc_expenses']);
@@ -95,27 +117,30 @@ export default function UpdateItem({ config, UpdateForm }) {
             );
             preTaxCost = calculate.multiply(preTaxCost, item['individualTaxRate2'] / 100);
 
-            // TRY ADDING SUBTOTAL WITH TOTAL. SO PREPARE TOTAL FIRST WITH PRETAXCOST
             item['total'] = Math.ceil(calculate.add(preTaxCost, item['total']));
-            //sub total
-            subtotal = calculate.add(subtotal, item['total']);
 
-            // Total Product Price
-            let productPrice = calculate.multiply(item['quantity'], item['price']);
-            totalProductPrice = calculate.add(totalProductPrice, productPrice);
-
-            // Total Transport Cost
-            totalTransportCost = calculate.add(totalTransportCost, item['transportation']);
-
-            // Total Expense
-            totalExpense = calculate.add(totalExpense, item['misc_expenses']);
+            // Quote Amount
+            item['quoteAmount'] =
+              item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
           }
+
+          // Update aggregates
+          subtotal = calculate.add(subtotal, item['total']);
+          totalProductPrice = calculate.add(
+            totalProductPrice,
+            calculate.multiply(item['quantity'], item['price'])
+          );
+          totalTransportCost = calculate.add(totalTransportCost, item['transportation']);
+          totalExpense = calculate.add(totalExpense, item['misc_expenses']);
+          totalquantity = calculate.add(totalquantity, item['quantity']);
         }
       });
+
       setSubTotal(subtotal);
       setTotalProductPrice(totalProductPrice);
       setTotalTransportCost(totalTransportCost);
       setTotalExpense(totalExpense);
+      setTotalQuantity(totalquantity);
     }
   };
 
@@ -131,7 +156,7 @@ export default function UpdateItem({ config, UpdateForm }) {
       if (fieldsValue.items) {
         let newList = [];
         fieldsValue.items.map((item) => {
-          const {
+          let {
             quantity,
             individualTaxRate,
             individualTaxRate2,
@@ -142,17 +167,29 @@ export default function UpdateItem({ config, UpdateForm }) {
             transportation,
             profit,
             unit_size,
+            quoteAmount,
+            ServiceCharge12Tax,
+            serviceChargesAmount,
+            total,
           } = item;
-          let total = quantity * price;
-          total = total + transportation;
-          total = total + misc_expenses;
-          total = total + (profit / 100) * total;
+          if (ServiceCharge12Tax) {
+            // Service Charge Calculation
+            total = calculate.multiply(quantity, price);
+            serviceChargesAmount = calculate.multiply(total, ServiceCharge12Tax / 100);
+            total = Math.ceil(calculate.add(total, serviceChargesAmount));
+            quoteAmount = quantity ? (total / quantity).toFixed(2) : 0;
+          } else {
+            total = quantity * price;
+            total = total + transportation;
+            total = total + misc_expenses;
+            total = total + (profit / 100) * total;
 
-          let preTaxCost = total;
-          preTaxCost = (individualTaxRate / 100) * preTaxCost + total;
-          preTaxCost = preTaxCost * (individualTaxRate2 / 100);
-          total = Math.ceil(preTaxCost + total);
-
+            let preTaxCost = total;
+            preTaxCost = (individualTaxRate / 100) * preTaxCost + total;
+            preTaxCost = preTaxCost * (individualTaxRate2 / 100);
+            total = Math.ceil(preTaxCost + total);
+            quoteAmount = quantity ? (total / quantity).toFixed(2) : 0;
+          }
           newList.push({
             total,
             quantity,
@@ -165,6 +202,7 @@ export default function UpdateItem({ config, UpdateForm }) {
             misc_expenses,
             profit,
             unit_size,
+            quoteAmount,
           });
         });
         dataToUpdate.items = newList;

@@ -27,6 +27,7 @@ const Taxes = lazy(() => import('@/pages/Taxes'));
 const AdvancedSettings = lazy(() => import('@/pages/AdvancedSettings'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Lead = lazy(() => import('@/pages/Lead/index'));
+const DeliveryChallanRead = lazy(() => import('@/pages/Lead/DeliveryChallanRead'));
 const Offer = lazy(() => import('@/pages/Offer/index'));
 const OfferCreate = lazy(() => import('@/pages/Offer/OfferCreate'));
 const OfferRead = lazy(() => import('@/pages/Offer/OfferRead'));
@@ -41,6 +42,8 @@ const People = lazy(() => import('@/pages/People'));
 const Company = lazy(() => import('@/pages/Company'));
 
 const About = lazy(() => import('@/pages/About'));
+
+const ScmDetails = lazy(() => import('@/pages/ScmDetails'));
 
 const Employee = lazy(() => import('@/pages/Employee'));
 
@@ -66,6 +69,10 @@ let routes = {
     {
       path: '/about',
       element: <About />,
+    },
+    {
+      path: '/scm',
+      element: <ScmDetails />,
     },
     {
       path: '/',
@@ -169,6 +176,10 @@ let routes = {
     {
       path: '/lead',
       element: <Lead />,
+    },
+    {
+      path: '/deliveryChallan/read/:id',
+      element: <DeliveryChallanRead />,
     },
     {
       path: '/offer',

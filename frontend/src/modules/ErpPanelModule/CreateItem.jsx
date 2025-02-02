@@ -13,7 +13,7 @@ import { selectCreatedItem } from '@/redux/erp/selectors';
 
 import calculate from '@/utils/calculate';
 import { generate as uniqueId } from 'shortid';
-
+import dayjs from 'dayjs';
 import Loading from '@/components/Loading';
 import {
   ArrowLeftOutlined,
@@ -24,6 +24,28 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 import { selectLangDirection } from '@/redux/translate/selectors';
+
+import { useBeforeUnload } from 'react-router-dom';
+
+const serializeFormData = (formData) => {
+  const dataToStore = JSON.parse(JSON.stringify(formData));
+
+  delete dataToStore.people;
+
+  if (dataToStore.items) {
+    dataToStore.items = dataToStore.items
+      .filter((item) => item !== null) // Remove null items
+      .map(({ product, ...rest }) => rest);
+  }
+
+  return {
+    ...dataToStore,
+    date: formData.date?.isValid?.() ? formData.date.toISOString() : dayjs().toISOString(),
+    priceValidity: formData.priceValidity?.isValid?.()
+      ? formData.priceValidity.toISOString()
+      : dayjs().add(7, 'days').toISOString(),
+  };
+};
 
 function SaveForm({ form }) {
   const translate = useLanguage();
@@ -55,7 +77,36 @@ export default function CreateItem({ config, CreateForm }) {
   const [totalTransportCost, setTotalTransportCost] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
-  const [offerSubTotal, setOfferSubTotal] = useState(0);
+  const [quoteAmount, setQuoteAmount] = useState(0);
+
+  useEffect(() => {
+    const loadDraft = () => {
+      const savedData = localStorage.getItem('draftQuote');
+      if (!savedData) return;
+
+      try {
+        const parsedData = JSON.parse(savedData);
+        const processedData = {
+          ...parsedData,
+          date: parsedData.date ? dayjs(parsedData.date) : dayjs(),
+          priceValidity: parsedData.priceValidity
+            ? dayjs(parsedData.priceValidity)
+            : dayjs().add(7, 'days'),
+        };
+
+        // Set initial values instead of fields
+        form.setFieldsValue(processedData);
+      } catch (error) {
+        console.error('Error loading draft:', error);
+        localStorage.removeItem('draftQuote');
+      }
+    };
+
+    // Delay loading to ensure form is initialized
+    const timeoutId = setTimeout(loadDraft, 100);
+    return () => clearTimeout(timeoutId);
+  }, [form]);
+
   const handelValuesChange = (changedValues, values) => {
     const items = values['items'];
     let subtotal = 0;
@@ -63,17 +114,24 @@ export default function CreateItem({ config, CreateForm }) {
     let totalTransportCost = 0;
     let totalExpense = 0;
     let totalquantity = 0;
-    let subOfferTotal = 0;
 
     if (items) {
       items.map((item) => {
         if (item) {
-          if (item.offerPrice && item.quantity) {
-            let offerTotal = calculate.multiply(item['quantity'], item['offerPrice']);
-            subOfferTotal = calculate.add(subOfferTotal, offerTotal);
-          }
-          if (item.quantity && item.price) {
-            // Sub Total
+          if (item.ServiceCharge12Tax) {
+            // Service Charge Calculation
+            item['total'] = calculate.multiply(item['quantity'], item['price']);
+            item['serviceChargesAmount'] = calculate.multiply(
+              item['total'],
+              item['ServiceCharge12Tax'] / 100
+            );
+            item['total'] = Math.ceil(calculate.add(item['total'], item['serviceChargesAmount']));
+
+            // Quote Amount
+            item['quoteAmount'] =
+              item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
+          } else {
+            // Individual Taxes Calculation
             item['total'] = calculate.multiply(item['quantity'], item['price']);
             item['total'] = calculate.add(item['total'], item['transportation']);
             item['total'] = calculate.add(item['total'], item['misc_expenses']);
@@ -86,55 +144,79 @@ export default function CreateItem({ config, CreateForm }) {
             );
             preTaxCost = calculate.multiply(preTaxCost, item['individualTaxRate2'] / 100);
 
-            // TRY ADDING SUBTOTAL WITH TOTAL. SO PREPARE TOTAL FIRST WITH PRETAXCOST
             item['total'] = Math.ceil(calculate.add(preTaxCost, item['total']));
-            //sub total
-            subtotal = calculate.add(subtotal, item['total']);
 
-            // Total Product Price
-            let productPrice = calculate.multiply(item['quantity'], item['price']);
-            totalProductPrice = calculate.add(totalProductPrice, productPrice);
-
-            // Total Transport Cost
-            totalTransportCost = calculate.add(totalTransportCost, item['transportation']);
-
-            // Total Expense
-            totalExpense = calculate.add(totalExpense, item['misc_expenses']);
-
-            // Total Quantity
-            totalquantity = calculate.add(totalquantity, item['quantity']);
+            // Quote Amount
+            item['quoteAmount'] =
+              item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
           }
+
+          // Update aggregates
+          subtotal = calculate.add(subtotal, item['total']);
+          totalProductPrice = calculate.add(
+            totalProductPrice,
+            calculate.multiply(item['quantity'], item['price'])
+          );
+          totalTransportCost = calculate.add(totalTransportCost, item['transportation']);
+          totalExpense = calculate.add(totalExpense, item['misc_expenses']);
+          totalquantity = calculate.add(totalquantity, item['quantity']);
         }
       });
+
       setSubTotal(subtotal);
       setTotalProductPrice(totalProductPrice);
       setTotalTransportCost(totalTransportCost);
       setTotalExpense(totalExpense);
       setTotalQuantity(totalquantity);
-      setOfferSubTotal(subOfferTotal);
     }
+    // Handle date serialization
+    const saveDraft = () => {
+      const valuesToStore = serializeFormData(values);
+      localStorage.setItem('draftQuote', JSON.stringify(valuesToStore));
+    };
+
+    const timeoutId = setTimeout(saveDraft, 300);
+    return () => clearTimeout(timeoutId);
   };
+  console.log(
+    'AFTER SETTING ITEM QUOTE AMOUNT and CHECKING SERVICE CHARGE IN STATE: ',
+    quoteAmount
+  );
+
+  // Update beforeunload handler
+  useBeforeUnload(() => {
+    const formData = form.getFieldsValue(true);
+    const valuesToStore = serializeFormData(formData);
+    localStorage.setItem('draftQuote', JSON.stringify(valuesToStore));
+  });
 
   useEffect(() => {
     if (isSuccess) {
       form.resetFields();
       dispatch(erp.resetAction({ actionType: 'create' }));
       setSubTotal(0);
-      setOfferSubTotal(0);
       navigate(`/${entity.toLowerCase()}/read/${result._id}`);
+      // Clear storage on successful submit
+      localStorage.removeItem('draftQuote');
     }
     return () => {};
   }, [isSuccess]);
 
   const onSubmit = (fieldsValue) => {
-    if (fieldsValue) {
-      if (fieldsValue.items) {
-        let newList = [...fieldsValue.items];
-        newList.map((item) => {
+    if (fieldsValue && fieldsValue.items) {
+      const newList = fieldsValue.items.map((item) => {
+        if (item.ServiceCharge12Tax) {
+          // Service Charge Calculation
+          item.total = calculate.multiply(item.quantity, item.price);
+          item.serviceChargesAmount = calculate.multiply(item.total, item.ServiceCharge12Tax / 100);
+          item.total = Math.ceil(calculate.add(item.total, item.serviceChargesAmount));
+          item.quoteAmount = item.quantity ? (item.total / item.quantity).toFixed(2) : 0;
+        } else {
+          // Individual Taxes Calculation
           item.total = calculate.multiply(item.quantity, item.price);
           item.total = calculate.add(item.total, item.transportation);
           item.total = calculate.add(item.total, item.misc_expenses);
-          item.total = calculate.add(item.total, (item.profit / 100) * subTotal);
+          item.total = calculate.add(item.total, (item.profit / 100) * item.total);
 
           let preTaxCost = item.total;
           preTaxCost = calculate.add(
@@ -144,14 +226,18 @@ export default function CreateItem({ config, CreateForm }) {
           preTaxCost = calculate.multiply(preTaxCost, item.individualTaxRate2 / 100);
 
           item.total = calculate.add(item.total, preTaxCost);
-        });
-        fieldsValue = {
-          ...fieldsValue,
-          items: newList,
-          totalQuantity: totalQuantity,
-        };
-      }
+          item.quoteAmount = item.quantity ? (item.total / item.quantity).toFixed(2) : 0;
+        }
+        return item;
+      });
+
+      fieldsValue = {
+        ...fieldsValue,
+        items: newList,
+        totalQuantity,
+      };
     }
+
     dispatch(erp.create({ entity, jsonData: fieldsValue }));
   };
   const langDirection = useSelector(selectLangDirection);
@@ -188,8 +274,6 @@ export default function CreateItem({ config, CreateForm }) {
             totalProductPrice={totalProductPrice}
             totalTransportCost={totalTransportCost}
             totalExpense={totalExpense}
-            totalQuantity={totalQuantity}
-            offerTotal={offerSubTotal}
           />
         </Form>
       </Loading>

@@ -1,66 +1,87 @@
 const { migrate } = require('./migrate');
 
 const paginatedList = async (Model, req, res) => {
-  const page = req.query.page || 1;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.items) || 10;
+    const skip = page * limit - limit;
 
-  const limit = parseInt(req.query.items) || 10;
-  const skip = page * limit - limit;
+    // Default sort by latest delivery date
+    const sortBy = req.query.sortBy || 'date';
+    const sortValue = req.query.sortValue || -1;
 
-  const { sortBy = 'enabled', sortValue = -1, filter, equal } = req.query;
-
-  const fieldsArray = req.query.fields ? req.query.fields.split(',') : [];
-
-  let fields;
-
-  fields = fieldsArray.length === 0 ? {} : { $or: [] };
-
-  for (const field of fieldsArray) {
-    fields.$or.push({ [field]: { $regex: new RegExp(req.query.q, 'i') } });
-  }
-
-  //  Query the database for a list of all results
-  const resultsPromise = Model.find({
-    removed: false,
-
-    [filter]: equal,
-    ...fields,
-  })
-    .skip(skip)
-    .limit(limit)
-    .sort({ [sortBy]: sortValue })
-    .populate()
-    .exec();
-
-  // Counting the total documents
-  const countPromise = Model.countDocuments({
-    removed: false,
-
-    [filter]: equal,
-    ...fields,
-  });
-  // Resolving both promises
-  const [result, count] = await Promise.all([resultsPromise, countPromise]);
-  // console.log('🚀 ~ file: paginatedList.js:23 ~ paginatedList ~ result:', result);
-
-  // Calculating total pages
-  const pages = Math.ceil(count / limit);
-
-  const pagination = { page, pages, count };
-  if (count > 0) {
-    const migratedData = result.map((x) => migrate(x));
-    // console.log('🚀 ~ file: paginatedList.js:23 ~ paginatedList ~ migratedData:', migratedData);
-    return res.status(200).json({
-      success: true,
-      result: migratedData,
-      pagination,
-      message: 'Successfully found all documents',
+    // Field filtering
+    const fieldsArray = req.query.fields ? req.query.fields.split(',') : [];
+    const fields = fieldsArray.length > 0 ? { $or: [] } : {};
+    fieldsArray.forEach((field) => {
+      fields.$or.push({ [field]: { $regex: new RegExp(req.query.q, 'i') } });
     });
-  } else {
-    return res.status(203).json({
-      success: true,
-      result: [],
-      pagination,
-      message: 'Collection is Empty',
+
+    // Date range filtering
+    const dateFilter = {};
+    if (req.query.startDate) {
+      dateFilter.$gte = new Date(req.query.startDate);
+    }
+    if (req.query.endDate) {
+      dateFilter.$lte = new Date(req.query.endDate);
+    }
+
+    // Build main query
+    const query = {
+      removed: false,
+      ...(req.query.status && { status: req.query.status }),
+      ...(req.query.paymentStatus && { paymentStatus: req.query.paymentStatus }),
+      ...(req.query.convertedFrom && { 'converted.from': req.query.convertedFrom }),
+      ...(Object.keys(dateFilter).length > 0 && { date: dateFilter }),
+      ...fields,
+    };
+
+    // Query results
+    const resultsPromise = Model.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortValue })
+      .populate('people', 'name email')
+      .populate('items.product', 'name hs_code')
+      .populate('converted.quote', 'number year')
+      .lean();
+
+    // Count total documents
+    const countPromise = Model.countDocuments(query);
+
+    const [result, count] = await Promise.all([resultsPromise, countPromise]);
+    const pages = Math.ceil(count / limit);
+
+    // Add financial calculations
+    const migratedData = result.map((challan) => ({
+      ...migrate(challan),
+      totalPayments: challan.payment?.reduce((sum, p) => sum + p.amount, 0) || 0,
+      balanceDue: challan.total - (challan.payment?.reduce((sum, p) => sum + p.amount, 0) || 0),
+    }));
+
+    const pagination = { page, pages, count };
+
+    if (count > 0) {
+      return res.status(200).json({
+        success: true,
+        result: migratedData,
+        pagination,
+        message: 'Successfully found delivery challans',
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        result: [],
+        pagination,
+        message: 'No delivery challans found',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      result: null,
+      message: 'Internal server error',
+      error: error.message,
     });
   }
 };

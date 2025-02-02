@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
 import { Form, Input, InputNumber, Button, Select, Divider, Row, Col } from 'antd';
-
 import { PlusOutlined } from '@ant-design/icons';
 
 import { DatePicker } from 'antd';
@@ -65,6 +64,7 @@ function LoadQuoteForm({
   const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
   const [quoteStatusValue, setQuoteStatusValue] = useState('pending');
   const [deliveryStatusValue, setDeliveryStatusValue] = useState('pending');
+  const [form] = Form.useForm();
 
   let investmentTotal =
     totalProductPrice + totalTransportCost + totalExpense + taxTotal + taxTotal2;
@@ -83,9 +83,9 @@ function LoadQuoteForm({
       setTaxRate2(taxRate2 / 100);
       setCurrentYear(year);
       setLastNumber(number);
+      console.log('QUOTE FORM current for service charge:', current);
     }
     current && setQuoteStatusValue(current.quoteStatus);
-    current && setDeliveryStatusValue(current.deliveryStatus);
   }, [current]);
 
   useEffect(() => {
@@ -104,10 +104,47 @@ function LoadQuoteForm({
     addField.current.click();
   }, []);
 
+  useEffect(() => {
+    if (!form) return; // Early return if form not initialized
+
+    const savedData = localStorage.getItem('draftQuote');
+    if (savedData && !current) {
+      try {
+        const parsedData = JSON.parse(savedData);
+
+        // Get current form values safely
+        const currentValues = form.getFieldsValue() || {};
+
+        // Process items safely
+        const safeItems = (parsedData.items || [])
+          .filter((item) => !!item)
+          .map((item) => ({
+            ...item,
+            product: undefined, // Explicitly remove product
+          }));
+
+        const processedData = {
+          ...currentValues, // Preserve current form state
+          ...parsedData, // Apply stored data
+          items: safeItems, // Use cleaned items
+          date: parsedData.date ? dayjs(parsedData.date) : dayjs(),
+          priceValidity: parsedData.priceValidity
+            ? dayjs(parsedData.priceValidity)
+            : dayjs().add(7, 'days'),
+        };
+
+        form.setFieldsValue(processedData);
+      } catch (error) {
+        console.error('Draft load error:', error);
+        localStorage.removeItem('draftQuote');
+      }
+    }
+  }, [form, current]); // form is now guaranteed to be defined
+
   return (
     <>
       <Row gutter={[12, 0]}>
-        <Col className="gutter-row" span={7}>
+        <Col className="gutter-row" span={5}>
           <Form.Item
             name="people"
             label={translate('People')}
@@ -117,48 +154,49 @@ function LoadQuoteForm({
               },
             ]}
           >
-            <AutoCompleteAsync
+            <SelectAsync
               entity={'people'}
               displayLabels={['name']}
-              searchFields={'name'}
-              redirectLabel={'Add New People'}
-              withRedirect
-              urlToRedirect={'/people'}
+              withRedirect={'Add New Client'}
+              urlToRedirect="/people"
+              redirectLabel={translate('Add New Client')}
+              placeholder={translate('Select Client')}
             />
           </Form.Item>
         </Col>
+
         <Col className="gutter-row" span={2}>
-          <Form.Item
-            label={translate('number')}
-            name="number"
-            initialValue={lastNumber}
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-        </Col>
-        <Col className="gutter-row" span={3}>
           <Form.Item
             label={translate('year')}
             name="year"
             initialValue={currentYear}
             rules={[
               {
-                required: true,
+                required: false,
               },
             ]}
           >
             <InputNumber style={{ width: '100%' }} />
           </Form.Item>
         </Col>
+        <Col className="gutter-row" span={4}>
+          <Form.Item
+            label={translate('PR #')}
+            name="pr_number"
+            initialValue={''}
+            rules={[
+              {
+                required: false,
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Col>
         {/* <Col className="gutter-row" span={6}>
           <SelectCurrency />
         </Col> */}
-        <Col className="gutter-row" span={4}>
+        <Col className="gutter-row" span={3}>
           <Form.Item
             label={translate('Quote Status')}
             name="quoteStatus"
@@ -185,55 +223,96 @@ function LoadQuoteForm({
             ></Select>
           </Form.Item>
         </Col>
-        {quoteStatusValue === 'approved' ? (
-          <Col className="gutter-row" span={4}>
+        {quoteStatusValue === 'approved' && (
+          <Col className="gutter-row" span={3}>
             <Form.Item
-              label={translate('Delivery Status')}
-              name="deliveryStatus"
+              label={translate('Generate DC?')}
+              name="generateDC"
               rules={[
                 {
                   required: false,
                 },
               ]}
-              initialValue={'pending'}
+              initialValue={'yes'}
             >
               <Select
                 options={[
-                  { value: 'draft', label: translate('Draft') },
-                  { value: 'pending', label: translate('Pending') },
-                  { value: 'delivered', label: translate('Delivered') },
-                  { value: 'declined', label: translate('Declined') },
-                  { value: 'cancelled', label: translate('Cancelled') },
-                  { value: 'returned', label: translate('Returned') },
-                  { value: 'on hold', label: translate('On Hold') },
+                  { value: 'yes', label: translate('Yes') },
+                  { value: 'no', label: translate('No') },
                 ]}
-                onChange={(value) => {
-                  setDeliveryStatusValue(value);
-                }}
               ></Select>
             </Form.Item>
           </Col>
-        ) : (
-          ''
         )}
-        {deliveryStatusValue === 'delivered' ? (
-          <Col className="gutter-row" span={4}>
-            <Form.Item
-              label={translate('PO #')}
-              name="po_number"
-              initialValue={'0'}
-              rules={[
-                {
-                  required: false,
-                },
+        <Col className="gutter-row" span={3}>
+          <Form.Item
+            label={translate('Delivery Status')}
+            name="deliveryStatus"
+            rules={[
+              {
+                required: false,
+              },
+            ]}
+            initialValue={'pending'}
+          >
+            <Select
+              options={[
+                { value: 'draft', label: translate('Draft') },
+                { value: 'pending', label: translate('Pending') },
+                { value: 'delivered', label: translate('Delivered') },
+                { value: 'declined', label: translate('Declined') },
+                { value: 'cancelled', label: translate('Cancelled') },
+                { value: 'returned', label: translate('Returned') },
+                { value: 'on hold', label: translate('On Hold') },
               ]}
+              onChange={(value) => {
+                setDeliveryStatusValue(value);
+              }}
+            ></Select>
+          </Form.Item>
+        </Col>
+        <Col className="gutter-row" span={4}>
+          <Form.Item
+            label={translate('PO #')}
+            name="po_number"
+            initialValue={''}
+            rules={[
+              {
+                required: false,
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Col>
+
+        {deliveryStatusValue === 'delivered' && (
+          <Col span={6}>
+            <Form.Item
+              name="scm"
+              label="SCM Bank Details"
+              rules={[{ required: true, message: 'Bank Account Title' }]}
             >
-              <InputNumber min={1} style={{ width: '100%' }} />
+              <SelectAsync
+                entity={'scm'}
+                displayLabels={['bankName_scm']}
+                searchFields={['bankName_scm']}
+                withRedirect={'Add New Bank Detail'}
+                redirectLabel="Add New Bank Detail"
+                urlToRedirect="/scm"
+              />
+              <AutoCompleteAsync
+                entity="scm"
+                displayLabels={['bankName_scm']}
+                searchFields={['bankName_scm']}
+                redirectLabel="Add New Bank Detail"
+                withRedirect
+                urlToRedirect="/scm"
+              />
             </Form.Item>
           </Col>
-        ) : (
-          ''
         )}
+
         <Col className="gutter-row" span={4}>
           <Form.Item
             name="date"
@@ -264,7 +343,7 @@ function LoadQuoteForm({
             <DatePicker style={{ width: '100%' }} format={dateFormat} />
           </Form.Item>
         </Col>
-        <Col className="gutter-row" span={deliveryStatusValue === 'delivered' ? 6 : 10}>
+        <Col className="gutter-row" span={deliveryStatusValue === 'delivered' ? 10 : 6}>
           <Form.Item
             label={translate('Payment Terms')}
             name="payment_terms"
@@ -277,7 +356,7 @@ function LoadQuoteForm({
             <Input />
           </Form.Item>
         </Col>
-        <Col className="gutter-row" span={quoteStatusValue === 'approved' ? 10 : 14}>
+        <Col className="gutter-row" span={10}>
           <Form.Item
             label={translate('Delivery Terms')}
             name="delivery_terms"
@@ -319,7 +398,15 @@ function LoadQuoteForm({
         <Row gutter={[12, -5]}>
           <Col className="gutter-row" span={5}>
             <Form.Item>
-              <Button type="primary" htmlType="submit" icon={<PlusOutlined />} block>
+              <Button
+                onClick={() => {
+                  localStorage.removeItem('draftQuote');
+                }}
+                type="primary"
+                htmlType="submit"
+                icon={<PlusOutlined />}
+                block
+              >
                 {translate('Save')}
               </Button>
             </Form.Item>
@@ -346,7 +433,7 @@ function LoadQuoteForm({
               name="taxRate"
               rules={[
                 {
-                  required: true,
+                  required: false,
                 },
               ]}
             >
@@ -359,7 +446,7 @@ function LoadQuoteForm({
                 withRedirect={true}
                 urlToRedirect="/taxes"
                 redirectLabel={translate('Add New Tax')}
-                placeholder={translate('Select Tax Value')}
+                placeholder={translate('Select GST Tax')}
               />
             </Form.Item>
           </Col>
@@ -405,7 +492,7 @@ function LoadQuoteForm({
                 withRedirect={true}
                 urlToRedirect="/taxes"
                 redirectLabel={translate('Add New Tax')}
-                placeholder={translate('Select Tax Value')}
+                placeholder={translate('Select WTH Tax')}
               />
             </Form.Item>
           </Col>

@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const schema = Joi.object({
-  client: Joi.alternatives().try(Joi.string(), Joi.object()).required(),
+  people: Joi.alternatives().try(Joi.string(), Joi.object()),
   number: Joi.number().required(),
   year: Joi.number().required(),
   status: Joi.string().required(),
@@ -21,6 +21,9 @@ const schema = Joi.object({
         misc_expenses: Joi.number().required(),
         profit: Joi.number().required(),
         total: Joi.number().required(),
+        individualTaxRate: Joi.number().required(),
+        individualTaxRate2: Joi.number().required(),
+        quoteAmount: Joi.number().required(),
       }).required()
     )
     .required(),

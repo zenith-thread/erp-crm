@@ -9,72 +9,80 @@ const schema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  name: {
+  name_scm: {
     type: String,
     required: true,
   },
-  ntnNumber: {
+  ntnNumber_scm: {
     type: String,
   },
-  bankName: {
-    type: String,
-    trim: true,
-  },
-  bankIban: {
+  bankAccountTitle_scm: {
     type: String,
     trim: true,
   },
-  bankSwift: {
+  bankName_scm: {
     type: String,
     trim: true,
   },
-  bankNumber: {
+  bankBranchCode_scm: {
     type: String,
     trim: true,
   },
-  bankRouting: {
+  bankIban_scm: {
     type: String,
     trim: true,
   },
-  address: {
+  bankSwift_scm: {
+    type: String,
+    trim: true,
+  },
+  bankAccountNumber_scm: {
+    type: String,
+    trim: true,
+  },
+  bankCode_scm: {
+    type: String,
+    trim: true,
+  },
+  address_scm: {
     type: String,
   },
-  city: {
+  city_scm: {
     type: String,
   },
-  State: {
+  State_scm: {
     type: String,
   },
-  postalCode: {
+  postalCode_scm: {
     type: Number,
   },
-  country: {
+  country_scm: {
     type: String,
     trim: true,
   },
-  phone: {
+  phone_scm: {
     type: String,
-    trim: true,
+    trim: false,
   },
-  otherPhone: [
+  otherPhone_scm: [
     {
       type: String,
-      trim: true,
+      trim: false,
     },
   ],
-  email: {
+  email_scm: {
     type: String,
-    trim: true,
+    trim: false,
     lowercase: true,
   },
-  otherEmail: [
+  otherEmail_scm: [
     {
       type: String,
-      trim: true,
+      trim: false,
       lowercase: true,
     },
   ],
-  website: {
+  website_scm: {
     type: String,
     trim: true,
     lowercase: true,
@@ -92,8 +100,10 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  peoples: [{ type: mongoose.Schema.ObjectId, ref: 'People', autopopulate: true }],
+  mainContact: { type: mongoose.Schema.ObjectId, ref: 'People', autopopulate: true },
 });
 
 schema.plugin(require('mongoose-autopopulate'));
 
-module.exports = mongoose.model('Vendor', schema);
+module.exports = mongoose.model('Scm', schema);

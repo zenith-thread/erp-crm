@@ -1,12 +1,17 @@
 const mongoose = require('mongoose');
 
-const invoiceSchema = new mongoose.Schema({
+const deliveryChallanSchema = new mongoose.Schema({
   removed: {
     type: Boolean,
     default: false,
   },
 
   createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin', required: true },
+
+  // dcRef: { type: mongoose.Schema.ObjectId, ref: 'DeliveryChallan', required: true },
+
+  scm: { type: mongoose.Schema.ObjectId, ref: 'Scm', required: true },
+
   number: {
     type: Number,
     required: true,
@@ -28,20 +33,16 @@ const invoiceSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  client: {
+  people: {
     type: mongoose.Schema.ObjectId,
-    ref: 'Client',
-    required: true,
+    ref: 'People',
+    required: false,
     autopopulate: true,
   },
   converted: {
     from: {
       type: String,
-      enum: ['quote', 'offer'],
-    },
-    offer: {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Offer',
+      enum: ['quote'],
     },
     quote: {
       type: mongoose.Schema.ObjectId,
@@ -51,16 +52,24 @@ const invoiceSchema = new mongoose.Schema({
   items: [
     {
       product: {
-        type: String,
+        type: mongoose.Schema.ObjectId,
         ref: 'Product',
         required: true,
+        autopopulate: true,
       },
-      // itemName: {
-      //   type: String,
-      //   required: true,
-      // },
       unit_size: {
         type: String,
+      },
+      description: {
+        type: String,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
       },
       transportation: {
         type: Number,
@@ -74,53 +83,49 @@ const invoiceSchema = new mongoose.Schema({
         type: Number,
         default: 0,
       },
-      description: {
-        type: String,
-      },
-      quantity: {
-        type: Number,
-        default: 1,
-        required: true,
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-      // discount: {
-      //   type: Number,
-      //   default: 0,
-      // },
-      // taxRate: {
-      //   type: Number,
-      //   default: 0,
-      // },
-      // subTotal: {
-      //   type: Number,
-      //   default: 0,
-      // },
-      // taxTotal: {
-      //   type: Number,
-      //   default: 0,
-      // },
       total: {
         type: Number,
         required: true,
       },
+      individualTaxRate2: {
+        type: Number,
+      },
+      individualTaxRate: {
+        type: Number,
+      },
+      ServiceCharge12Tax: {
+        type: Number,
+      },
+      serviceChargesAmount: {
+        type: Number,
+      },
+      quoteAmount: {
+        type: String,
+      },
     },
   ],
+  totalQuantity: {
+    type: Number,
+  },
   taxRate: {
     type: Number,
-    default: 0,
+  },
+  taxRate2: {
+    type: Number,
   },
   subTotal: {
     type: Number,
-    default: 0,
   },
   taxTotal: {
     type: Number,
-    default: 0,
+  },
+  taxTotal2: {
+    type: Number,
   },
   total: {
+    type: Number,
+  },
+  credit: {
     type: Number,
     default: 0,
   },
@@ -129,10 +134,6 @@ const invoiceSchema = new mongoose.Schema({
     default: 'NA',
     uppercase: true,
     required: true,
-  },
-  credit: {
-    type: Number,
-    default: 0,
   },
   discount: {
     type: Number,
@@ -190,5 +191,5 @@ const invoiceSchema = new mongoose.Schema({
   },
 });
 
-invoiceSchema.plugin(require('mongoose-autopopulate'));
-module.exports = mongoose.model('Invoice', invoiceSchema);
+deliveryChallanSchema.plugin(require('mongoose-autopopulate'));
+module.exports = mongoose.model('Invoice', deliveryChallanSchema);

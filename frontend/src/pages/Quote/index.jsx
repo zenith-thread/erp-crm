@@ -29,7 +29,7 @@ export default function Quote() {
     },
     {
       title: translate('Quote Ref #'),
-      dataIndex: ['number'],
+      dataIndex: ['_id'],
       fixed: 'left',
     },
     {
@@ -49,7 +49,7 @@ export default function Quote() {
     },
     {
       title: translate('PR #'),
-      dataIndex: ['ref'],
+      dataIndex: ['pr_number'],
     },
     {
       title: translate('Destination'),

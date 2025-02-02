@@ -52,7 +52,7 @@ const summary = async (Model, req, res) => {
             $lookup: {
               from: OfferModel.collection.name,
               localField: '_id', // Match _id from ClientModel
-              foreignField: 'lead', // Match client field in OfferModel
+              foreignField: 'deliveryChallan', // Match client field in OfferModel
               as: 'offer',
             },
           },

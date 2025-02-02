@@ -69,11 +69,11 @@ function Sidebar({ collapsible, isMobile = false }) {
       icon: <FileSyncOutlined />,
       label: <Link to={'/quote'}>{translate('quotations')}</Link>,
     },
-    {
-      key: 'delivery_chalan',
-      icon: <ContainerOutlined />,
-      label: <Link to={'/invoice'}>{translate('delivery Chalan')}</Link>,
-    },
+    // {
+    //   key: 'delivery_chalan',
+    //   icon: <FileOutlined />,
+    //   label: <Link to={'/invoice'}>{translate('delivery_challan')}</Link>,
+    // },
     {
       key: 'invoice',
       icon: <ContainerOutlined />,
@@ -84,11 +84,11 @@ function Sidebar({ collapsible, isMobile = false }) {
     //   icon: <CustomerServiceOutlined />,
     //   label: <Link to={'/customer'}>{translate('client')}</Link>,
     // },
-    // {
-    //   key: 'lead',
-    //   icon: <FilterOutlined />,
-    //   label: <Link to={'/lead'}>{translate('leads')}</Link>,
-    // },
+    {
+      key: 'deliveryChallan',
+      icon: <FilterOutlined />,
+      label: <Link to={'/lead'}>{translate('deliveryChallan')}</Link>,
+    },
     // {
     //   key: 'offer',
     //   icon: <FileOutlined />,
@@ -145,6 +145,10 @@ function Sidebar({ collapsible, isMobile = false }) {
         {
           key: 'about',
           label: <Link to={'/about'}>{translate('about')}</Link>,
+        },
+        {
+          key: 'scm',
+          label: <Link to={'/scm'}>{translate('SCM Solutions Details')}</Link>,
         },
       ],
     },
