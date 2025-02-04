@@ -24,6 +24,7 @@ export default function QuoteForm({
   totalTransportCost = 0,
   totalExpense = 0,
   subTotal = 0,
+  subTotalWithoutServiceCharge = 0,
   current = null,
 }) {
   const { last_quote_number } = useSelector(selectFinanceSettings);
@@ -39,6 +40,7 @@ export default function QuoteForm({
       totalTransportCost={totalTransportCost}
       totalExpense={totalExpense}
       current={current}
+      subTotalWithoutServiceCharge={subTotalWithoutServiceCharge}
     />
   );
 }
@@ -48,6 +50,7 @@ function LoadQuoteForm({
   totalTransportCost = 0,
   totalExpense = 0,
   subTotal = 0,
+  subTotalWithoutServiceCharge = 0,
   current = null,
 }) {
   const translate = useLanguage();
@@ -83,7 +86,6 @@ function LoadQuoteForm({
       setTaxRate2(taxRate2 / 100);
       setCurrentYear(year);
       setLastNumber(number);
-      console.log('QUOTE FORM current for service charge:', current);
     }
     current && setQuoteStatusValue(current.quoteStatus);
   }, [current]);
@@ -94,7 +96,12 @@ function LoadQuoteForm({
     setTotal(Number.parseFloat(currentTotal));
 
     const currentInvestment = calculate.add(calculate.multiply(total, taxRate2), total);
-    setTaxTotal2(Number.parseFloat(calculate.multiply(total, taxRate2)));
+
+    let subTotalWithoutServiceChargeGST = calculate.add(
+      calculate.multiply(subTotalWithoutServiceCharge, taxRate),
+      subTotalWithoutServiceCharge
+    );
+    setTaxTotal2(Number.parseFloat(calculate.multiply(subTotalWithoutServiceChargeGST, taxRate2)));
     setTotalInvestment(Number.parseFloat(currentInvestment));
   }, [subTotal, total, taxRate, taxRate2]);
 
@@ -299,14 +306,6 @@ function LoadQuoteForm({
                 searchFields={['bankName_scm']}
                 withRedirect={'Add New Bank Detail'}
                 redirectLabel="Add New Bank Detail"
-                urlToRedirect="/scm"
-              />
-              <AutoCompleteAsync
-                entity="scm"
-                displayLabels={['bankName_scm']}
-                searchFields={['bankName_scm']}
-                redirectLabel="Add New Bank Detail"
-                withRedirect
                 urlToRedirect="/scm"
               />
             </Form.Item>

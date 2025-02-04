@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback, useEffect } from 'react';
+import { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { Form, Input, InputNumber, Row, Col, Divider } from 'antd';
 
 import { DeleteOutlined } from '@ant-design/icons';
@@ -15,9 +15,10 @@ function ItemRow({ field, remove, current }) {
   const form = Form.useFormInstance();
   const money = useMoney();
 
+  // const [isServiceChargeTaxApplied, setIsServiceChargeTaxApplied] = useState(false);
   // Get all field values at once
   const watchedValues = Form.useWatch([field.name], form) || {};
-
+  // console.log('STATE VALUE: ', isServiceChargeTaxApplied);
   // Calculate total without side effects
   const total = useMemo(() => {
     let {
@@ -242,6 +243,7 @@ function ItemRow({ field, remove, current }) {
           rules={[{ required: false }]}
         >
           <MemoSelectAsync
+            labelInValue // enable labelInValue mode
             {...createValueHandler('ServiceCharge12Tax', 100)}
             entity="taxes"
             outputValue="taxValue"
@@ -250,6 +252,14 @@ function ItemRow({ field, remove, current }) {
             urlToRedirect="/taxes"
             redirectLabel="Add New Tax"
             placeholder="Select Service Charge"
+            // onChange={(selected) => {
+            //   const taxName = selected.label.props.children;
+            //   if (taxName === 'Service Charge @12%') {
+            //     setIsServiceChargeTaxApplied(true);
+            //   } else {
+            //     setIsServiceChargeTaxApplied(false);
+            //   }
+            // }}
           />
         </Form.Item>
       </Col>
@@ -270,16 +280,24 @@ function ItemRow({ field, remove, current }) {
           />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={4} style={{ display: 'none' }}>
+      <Col className="gutter-row" span={0} style={{ display: 'none' }}>
         <Form.Item name={[field.name, 'quoteAmount']} label="Unit Quote Amount">
           <Input />
         </Form.Item>
       </Col>
-      <Col className="gutter-row" span={4} style={{ display: 'none' }}>
+      <Col className="gutter-row" span={0} style={{ display: 'none' }}>
         <Form.Item name={[field.name, 'serviceChargesAmount']} label="Service Charge Amount">
           <Input />
         </Form.Item>
       </Col>
+      {/* <Col className="gutter-row" span={4} style={{ display: 'block' }}>
+        <Form.Item
+          name={[field.name, 'isServiceChargeTaxApplied']}
+          label="Is Service Charge Applied"
+        >
+          <Input readOnly value={isServiceChargeTaxApplied} />
+        </Form.Item>
+      </Col> */}
 
       <div style={{ position: 'absolute', right: '-20px', top: '80px' }}>
         <DeleteOutlined onClick={() => remove(field.name)} />

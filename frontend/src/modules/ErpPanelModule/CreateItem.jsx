@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
-
 import { Button, Tag, Form, Divider } from 'antd';
 import { PageHeader } from '@ant-design/pro-layout';
-
 import { useSelector, useDispatch } from 'react-redux';
-
 import useLanguage from '@/locale/useLanguage';
-
 import { settingsAction } from '@/redux/settings/actions';
 import { erp } from '@/redux/erp/actions';
 import { selectCreatedItem } from '@/redux/erp/selectors';
-
 import calculate from '@/utils/calculate';
 import { generate as uniqueId } from 'shortid';
 import dayjs from 'dayjs';
@@ -21,20 +16,17 @@ import {
   CloseCircleOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-
 import { useNavigate } from 'react-router-dom';
 import { selectLangDirection } from '@/redux/translate/selectors';
-
 import { useBeforeUnload } from 'react-router-dom';
 
 const serializeFormData = (formData) => {
   const dataToStore = JSON.parse(JSON.stringify(formData));
-
   delete dataToStore.people;
 
   if (dataToStore.items) {
     dataToStore.items = dataToStore.items
-      .filter((item) => item !== null) // Remove null items
+      .filter((item) => item !== null)
       .map(({ product, ...rest }) => rest);
   }
 
@@ -68,16 +60,22 @@ export default function CreateItem({ config, CreateForm }) {
   useEffect(() => {
     dispatch(settingsAction.list({ entity: 'setting' }));
   }, []);
-  let { entity } = config;
 
+  let { entity } = config;
   const { isLoading, isSuccess, result } = useSelector(selectCreatedItem);
   const [form] = Form.useForm();
+
+  // State variables
   const [subTotal, setSubTotal] = useState(0);
+  const [subTotalWithoutServiceCharge, setSubTotalWithoutServiceCharge] = useState(0);
   const [totalProductPrice, setTotalProductPrice] = useState(0);
   const [totalTransportCost, setTotalTransportCost] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
-  const [quoteAmount, setQuoteAmount] = useState(0);
+
+  useEffect(() => {
+    console.log('SUBTOTAL WITHOUT SERVICE CHANGE: ', subTotalWithoutServiceCharge);
+  }, [subTotalWithoutServiceCharge]);
 
   useEffect(() => {
     const loadDraft = () => {
@@ -94,7 +92,6 @@ export default function CreateItem({ config, CreateForm }) {
             : dayjs().add(7, 'days'),
         };
 
-        // Set initial values instead of fields
         form.setFieldsValue(processedData);
       } catch (error) {
         console.error('Error loading draft:', error);
@@ -102,7 +99,6 @@ export default function CreateItem({ config, CreateForm }) {
       }
     };
 
-    // Delay loading to ensure form is initialized
     const timeoutId = setTimeout(loadDraft, 100);
     return () => clearTimeout(timeoutId);
   }, [form]);
@@ -110,13 +106,14 @@ export default function CreateItem({ config, CreateForm }) {
   const handelValuesChange = (changedValues, values) => {
     const items = values['items'];
     let subtotal = 0;
+    let subtotalWithoutSC = 0;
     let totalProductPrice = 0;
     let totalTransportCost = 0;
     let totalExpense = 0;
     let totalquantity = 0;
 
     if (items) {
-      items.map((item) => {
+      items.forEach((item) => {
         if (item) {
           if (item.ServiceCharge12Tax) {
             // Service Charge Calculation
@@ -127,9 +124,8 @@ export default function CreateItem({ config, CreateForm }) {
             );
             item['total'] = Math.ceil(calculate.add(item['total'], item['serviceChargesAmount']));
 
-            // Quote Amount
-            item['quoteAmount'] =
-              item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
+            // Only add to regular subtotal
+            subtotal = calculate.add(subtotal, item['total']);
           } else {
             // Individual Taxes Calculation
             item['total'] = calculate.multiply(item['quantity'], item['price']);
@@ -146,13 +142,12 @@ export default function CreateItem({ config, CreateForm }) {
 
             item['total'] = Math.ceil(calculate.add(preTaxCost, item['total']));
 
-            // Quote Amount
-            item['quoteAmount'] =
-              item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
+            // Add to both subtotals
+            subtotal = calculate.add(subtotal, item['total']);
+            subtotalWithoutSC = calculate.add(subtotalWithoutSC, item['total']);
           }
 
-          // Update aggregates
-          subtotal = calculate.add(subtotal, item['total']);
+          // Common aggregations
           totalProductPrice = calculate.add(
             totalProductPrice,
             calculate.multiply(item['quantity'], item['price'])
@@ -160,16 +155,21 @@ export default function CreateItem({ config, CreateForm }) {
           totalTransportCost = calculate.add(totalTransportCost, item['transportation']);
           totalExpense = calculate.add(totalExpense, item['misc_expenses']);
           totalquantity = calculate.add(totalquantity, item['quantity']);
+
+          // Update quote amount regardless of tax type
+          item['quoteAmount'] =
+            item['quantity'] > 0 ? Math.round((item['total'] / item['quantity']) * 100) / 100 : 0;
         }
       });
 
       setSubTotal(subtotal);
+      setSubTotalWithoutServiceCharge(subtotalWithoutSC);
       setTotalProductPrice(totalProductPrice);
       setTotalTransportCost(totalTransportCost);
       setTotalExpense(totalExpense);
       setTotalQuantity(totalquantity);
     }
-    // Handle date serialization
+
     const saveDraft = () => {
       const valuesToStore = serializeFormData(values);
       localStorage.setItem('draftQuote', JSON.stringify(valuesToStore));
@@ -178,12 +178,7 @@ export default function CreateItem({ config, CreateForm }) {
     const timeoutId = setTimeout(saveDraft, 300);
     return () => clearTimeout(timeoutId);
   };
-  console.log(
-    'AFTER SETTING ITEM QUOTE AMOUNT and CHECKING SERVICE CHARGE IN STATE: ',
-    quoteAmount
-  );
 
-  // Update beforeunload handler
   useBeforeUnload(() => {
     const formData = form.getFieldsValue(true);
     const valuesToStore = serializeFormData(formData);
@@ -195,24 +190,21 @@ export default function CreateItem({ config, CreateForm }) {
       form.resetFields();
       dispatch(erp.resetAction({ actionType: 'create' }));
       setSubTotal(0);
+      setSubTotalWithoutServiceCharge(0);
       navigate(`/${entity.toLowerCase()}/read/${result._id}`);
-      // Clear storage on successful submit
       localStorage.removeItem('draftQuote');
     }
-    return () => {};
   }, [isSuccess]);
 
   const onSubmit = (fieldsValue) => {
     if (fieldsValue && fieldsValue.items) {
       const newList = fieldsValue.items.map((item) => {
         if (item.ServiceCharge12Tax) {
-          // Service Charge Calculation
           item.total = calculate.multiply(item.quantity, item.price);
           item.serviceChargesAmount = calculate.multiply(item.total, item.ServiceCharge12Tax / 100);
           item.total = Math.ceil(calculate.add(item.total, item.serviceChargesAmount));
           item.quoteAmount = item.quantity ? (item.total / item.quantity).toFixed(2) : 0;
         } else {
-          // Individual Taxes Calculation
           item.total = calculate.multiply(item.quantity, item.price);
           item.total = calculate.add(item.total, item.transportation);
           item.total = calculate.add(item.total, item.misc_expenses);
@@ -240,18 +232,17 @@ export default function CreateItem({ config, CreateForm }) {
 
     dispatch(erp.create({ entity, jsonData: fieldsValue }));
   };
+
   const langDirection = useSelector(selectLangDirection);
+
   return (
     <>
       <PageHeader
-        onBack={() => {
-          navigate(`/${entity.toLowerCase()}`);
-        }}
+        onBack={() => navigate(`/${entity.toLowerCase()}`)}
         backIcon={langDirection === 'rtl' ? <ArrowRightOutlined /> : <ArrowLeftOutlined />}
         title={translate('New')}
         ghost={false}
         tags={<Tag>{translate('Draft')}</Tag>}
-        // subTitle="This is create page"
         extra={[
           <Button
             key={`${uniqueId()}`}
@@ -262,15 +253,14 @@ export default function CreateItem({ config, CreateForm }) {
           </Button>,
           <SaveForm form={form} key={`${uniqueId()}`} />,
         ]}
-        style={{
-          padding: '20px 0px',
-        }}
-      ></PageHeader>
+        style={{ padding: '20px 0px' }}
+      />
       <Divider dashed />
       <Loading isLoading={isLoading}>
         <Form form={form} layout="vertical" onFinish={onSubmit} onValuesChange={handelValuesChange}>
           <CreateForm
             subTotal={subTotal}
+            subTotalWithoutServiceCharge={subTotalWithoutServiceCharge}
             totalProductPrice={totalProductPrice}
             totalTransportCost={totalTransportCost}
             totalExpense={totalExpense}

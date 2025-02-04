@@ -4,6 +4,7 @@ import { tagColor } from '@/utils/statusTagColor';
 import QuoteDataTableModule from '@/modules/QuoteModule/QuoteDataTableModule';
 import { useDate } from '@/settings';
 import useLanguage from '@/locale/useLanguage';
+import { useEffect, useState } from 'react';
 
 export default function Quote() {
   const translate = useLanguage();
@@ -15,6 +16,7 @@ export default function Quote() {
     displayLabels: ['name'],
     searchFields: ['name'],
   };
+
   const deleteModalLabels = ['number', 'people.name'];
   const dataTableColumns = [
     {

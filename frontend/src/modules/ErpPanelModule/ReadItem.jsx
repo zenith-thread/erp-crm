@@ -213,7 +213,7 @@ export default function ReadItem({ config, selectedItem }) {
                     {currentErp.po_number} || 987987987
                   </div>
                   <div style={{ border: '1px solid #ccc', padding: '2px 6px' }}>
-                    {currentErp.scm.ntnNumber_scm} || 98798987
+                    {/* {currentErp.scm.ntnNumber_scm} || 98798987 */}
                   </div>
                 </div>
               </div>

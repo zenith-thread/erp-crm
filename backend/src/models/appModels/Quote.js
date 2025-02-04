@@ -39,6 +39,12 @@ const quoteSchema = new mongoose.Schema({
     required: true,
     autopopulate: true,
   },
+
+  dcRef: { type: mongoose.Schema.ObjectId, ref: 'DeliveryChallan', required: false },
+  invoiceRef: { type: mongoose.Schema.ObjectId, ref: 'Invoice', required: false },
+  net_recievable_amount: {
+    type: Number,
+  },
   items: [
     {
       product: {

@@ -8,7 +8,7 @@ const deliveryChallanSchema = new mongoose.Schema({
 
   createdBy: { type: mongoose.Schema.ObjectId, ref: 'Admin', required: true },
 
-  // dcRef: { type: mongoose.Schema.ObjectId, ref: 'DeliveryChallan', required: true },
+  dcRef: { type: mongoose.Schema.ObjectId, ref: 'DeliveryChallan', required: false },
 
   scm: { type: mongoose.Schema.ObjectId, ref: 'Scm', required: true },
 
@@ -27,7 +27,19 @@ const deliveryChallanSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: true,
+    required: false,
+  },
+  invoice_date: {
+    type: Date,
+    required: false,
+  },
+  invoice_delivery_date: {
+    type: Date,
+    required: false,
+  },
+  invoice_due_date: {
+    type: Date,
+    required: false,
   },
   priceValidity: {
     type: Date,
@@ -48,6 +60,14 @@ const deliveryChallanSchema = new mongoose.Schema({
       type: mongoose.Schema.ObjectId,
       ref: 'Quote',
     },
+  },
+  po_number: {
+    type: String,
+    required: false,
+  },
+  pr_number: {
+    type: String,
+    required: false,
   },
   items: [
     {
@@ -104,6 +124,9 @@ const deliveryChallanSchema = new mongoose.Schema({
       },
     },
   ],
+  net_recievable_amount: {
+    type: Number,
+  },
   totalQuantity: {
     type: Number,
   },
@@ -131,7 +154,7 @@ const deliveryChallanSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'NA',
+    default: 'Rs',
     uppercase: true,
     required: true,
   },
@@ -150,21 +173,13 @@ const deliveryChallanSchema = new mongoose.Schema({
     default: 'unpaid',
     enum: ['unpaid', 'paid', 'partially'],
   },
-  isOverdue: {
-    type: Boolean,
-    default: false,
-  },
-  approved: {
-    type: Boolean,
-    default: false,
-  },
   notes: {
     type: String,
   },
   status: {
     type: String,
-    enum: ['draft', 'pending', 'sent', 'refunded', 'cancelled', 'on hold'],
-    default: 'draft',
+    enum: ['pending', 'sent', 'refunded', 'cancelled', 'on hold'],
+    default: 'pending',
   },
   pdf: {
     type: String,

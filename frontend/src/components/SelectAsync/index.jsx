@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { request } from '@/request';
 import useFetch from '@/hooks/useFetch';
 import { Select, Tag } from 'antd';
@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { generate as uniqueId } from 'shortid';
 import color from '@/utils/color';
 import useLanguage from '@/locale/useLanguage';
-import useDebounce from '@/hooks/useDebounce';
 
 const SelectAsync = ({
   entity,
@@ -16,72 +15,29 @@ const SelectAsync = ({
   withRedirect = false,
   urlToRedirect = '/',
   placeholder = 'select',
-  searchFields = [],
   value,
   onChange,
 }) => {
   const translate = useLanguage();
   const [selectOptions, setOptions] = useState([]);
   const [currentValue, setCurrentValue] = useState(undefined);
-  const [valToSearch, setValToSearch] = useState('');
-  const [debouncedValue, setDebouncedValue] = useState('');
 
   const navigate = useNavigate();
 
-  useDebounce(
-    () => {
-      setDebouncedValue(valToSearch);
-    },
-    500,
-    [valToSearch]
-  );
-
-  // Fetch initial list
-  const asyncList = useCallback(() => {
+  const asyncList = () => {
     return request.list({ entity });
-  }, [entity]);
-
+  };
   const { result, isLoading: fetchIsLoading, isSuccess } = useFetch(asyncList);
-
-  // Fetch search results
-  const asyncSearch = useCallback(() => {
-    if (!debouncedValue) return Promise.resolve([]);
-    return request.search({
-      entity,
-      options: {
-        q: debouncedValue,
-        fields: searchFields,
-      },
-    });
-  }, [debouncedValue, entity, searchFields]);
-
-  const {
-    result: searchResult,
-    isLoading: isSearchLoading,
-    isSuccess: isSearchSuccess,
-  } = useFetch(asyncSearch, [debouncedValue]);
-
-  // Combine results based on search state
   useEffect(() => {
-    if (debouncedValue) {
-      if (isSearchSuccess) {
-        setOptions(searchResult);
-      }
-    } else {
-      if (isSuccess) {
-        setOptions(result);
-      }
-    }
-  }, [debouncedValue, isSearchSuccess, searchResult, isSuccess, result]);
+    isSuccess && setOptions(result);
+  }, [isSuccess]);
 
   const labels = (optionField) => {
     return displayLabels.map((x) => optionField[x]).join(' ');
   };
-
-  // Handle value prop changes
   useEffect(() => {
     if (value !== undefined) {
-      const val = value[outputValue] ?? value;
+      const val = value?.[outputValue] ?? value;
       setCurrentValue(val);
       onChange(val);
     }
@@ -91,7 +47,7 @@ const SelectAsync = ({
     if (newValue === 'redirectURL') {
       navigate(urlToRedirect);
     } else {
-      const val = newValue[outputValue] ?? newValue;
+      const val = newValue?.[outputValue] ?? newValue;
       setCurrentValue(newValue);
       onChange(val);
     }
@@ -99,36 +55,42 @@ const SelectAsync = ({
 
   const optionsList = () => {
     const list = [];
-    selectOptions.forEach((optionField) => {
+
+    // if (selectOptions.length === 0 && withRedirect) {
+    //   const value = 'redirectURL';
+    //   const label = `+ ${translate(redirectLabel)}`;
+    //   list.push({ value, label });
+    // }
+    selectOptions.map((optionField) => {
       const value = optionField[outputValue] ?? optionField;
       const label = labels(optionField);
       const currentColor = optionField[outputValue]?.color ?? optionField?.color;
       const labelColor = color.find((x) => x.color === currentColor);
       list.push({ value, label, color: labelColor?.color });
     });
+
     return list;
   };
 
   return (
     <Select
-      showSearch
-      filterOption={false}
-      onSearch={setValToSearch}
-      loading={fetchIsLoading || isSearchLoading}
-      disabled={fetchIsLoading || isSearchLoading}
+      loading={fetchIsLoading}
+      disabled={fetchIsLoading}
       value={currentValue}
       onChange={handleSelectChange}
-      placeholder={translate(placeholder)}
+      placeholder={placeholder}
     >
-      {optionsList().map((option) => (
-        <Select.Option key={`${uniqueId()}`} value={option.value}>
-          <Tag bordered={false} color={option.color}>
-            {option.label}
-          </Tag>
-        </Select.Option>
-      ))}
+      {optionsList()?.map((option) => {
+        return (
+          <Select.Option key={`${uniqueId()}`} value={option.value}>
+            <Tag bordered={false} color={option.color}>
+              {option.label}
+            </Tag>
+          </Select.Option>
+        );
+      })}
       {withRedirect && (
-        <Select.Option value="redirectURL">{`+ ${translate(redirectLabel)}`}</Select.Option>
+        <Select.Option value={'redirectURL'}>{`+ ` + translate(redirectLabel)}</Select.Option>
       )}
     </Select>
   );

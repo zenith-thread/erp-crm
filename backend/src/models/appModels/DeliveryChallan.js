@@ -25,6 +25,10 @@ const deliveryChallanSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  delivery_challan_delivery_date: {
+    type: Date,
+    required: true,
+  },
   priceValidity: {
     type: Date,
     required: true,
@@ -157,14 +161,6 @@ const deliveryChallanSchema = new mongoose.Schema({
     type: String,
     enum: ['draft', 'pending', 'delivered', 'declined', 'cancelled', 'returned', 'on hold'],
     default: 'pending',
-  },
-  isOverdue: {
-    type: Boolean,
-    default: false,
-  },
-  approved: {
-    type: Boolean,
-    default: false,
   },
   remarks: {
     type: String,
